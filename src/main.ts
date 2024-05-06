@@ -1,8 +1,21 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import multipart from '@fastify/multipart';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter(),
+  );
+  app.setGlobalPrefix('api');
+  app.enableCors({ origin: '*' });
+  app.register(multipart);
+  await app.listen(3001);
 }
+// Learn more at https://deno.land/manual/examples/module_metadata#concepts
+
 bootstrap();
