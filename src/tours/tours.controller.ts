@@ -1,36 +1,39 @@
 import {
   Body,
   Controller,
+  Delete,
+  Param,
   Post,
-  UploadedFiles,
+  UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
-import {
-  File,
-  FilesInterceptor,
-  FastifyMulterModule,
-} from '@nest-lab/fastify-multer';
-import * as sharp from 'sharp';
-import { writeFileSync } from 'fs';
+import { File, FileInterceptor } from '@nest-lab/fastify-multer';
+import { ToursService } from './tours.service';
 
 @Controller('tours')
 export class ToursController {
+  constructor(private readonly tourService: ToursService) {}
   @Post()
-  @UseInterceptors(FilesInterceptor('images'))
   //   @UseGuards(JwtAuthGuard)
-  async create(
-    @Body() createVolunteerDto: CreateTourDto,
-    @UploadedFiles()
-    files: Array<File>,
-  ) {
-    console.log(files);
-    const fi = await sharp(files[0].buffer)
-      .resize({ fit: sharp.fit.contain, width: 150 })
-      .jpeg({ quality: 100 })
-      .toFile('./name.jpg');
+  async create(@Body() createTourDto: any) {
+    return this.tourService.createTour(createTourDto);
+  }
 
-    // return this.volunteersService.create(createVolunteerDto, files);
-    // writeFileSync('./name1.jpg', fi);
+  @Post('/images')
+  @UseInterceptors(FileInterceptor('image'))
+  //   @UseGuards(JwtAuthGuard)
+  async upload(
+    @UploadedFile()
+    file: File,
+  ) {
+    console.log(file);
+    return this.tourService.uploadImage(file);
+  }
+
+  @Delete('/images/:uuid')
+  //   @UseGuards(JwtAuthGuard)
+  deleteImage(@Param('uuid') imageUUID: string) {
+    return this.tourService.removeImage(imageUUID);
   }
 }

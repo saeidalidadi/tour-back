@@ -1,5 +1,4 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Page } from './page.entity';
 
 @Entity('users')
 export class User {
@@ -21,8 +20,8 @@ export class User {
   @Column({ type: 'varchar' })
   salt?: string;
 
-  @OneToMany('Page', 'user')
-  pages?: Page[];
+  // @OneToMany('Page', 'user')
+  // pages?: Page[];
 
   @Column({ type: 'bool', default: false })
   isProvider?: boolean;
