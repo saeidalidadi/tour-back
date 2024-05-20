@@ -20,9 +20,6 @@ export class User {
   @Column({ type: 'varchar' })
   salt?: string;
 
-  // @OneToMany('Page', 'user')
-  // pages?: Page[];
-
   @Column({ type: 'bool', default: false })
   isProvider?: boolean;
 }

@@ -34,4 +34,9 @@ export class UserService {
   async getProfile(id: number) {
     return await this.usersRepository.findOne({ where: { id: id } });
   }
+
+  async isProvider(userId) {
+    return (await this.usersRepository.findOne({ where: { id: userId } }))
+      .isProvider;
+  }
 }

@@ -7,9 +7,16 @@ import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import entities from './entities/index';
 import { ToursModule } from './tours/tours.module';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '/public'),
+      serveStaticOptions: { index: false },
+      serveRoot: '/public',
+    }),
     ConfigModule.forRoot({
       load: [configuration],
     }),

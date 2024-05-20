@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
 import * as sharp from 'sharp';
 import { File } from '@nest-lab/fastify-multer';
@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ToursService {
@@ -17,9 +18,15 @@ export class ToursService {
     @InjectRepository(ImageEntity)
     private readonly imageRepository: Repository<ImageEntity>,
     private dataSource: DataSource,
+    private readonly userService: UserService,
   ) {}
 
-  async createTour(tour: CreateTourDto) {
+  async createTour(tour: CreateTourDto, userId: number) {
+    const isProvider = await this.userService.isProvider(userId);
+    console.log('is provider', isProvider);
+    if (!isProvider) {
+      throw new UnauthorizedException();
+    }
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -84,5 +91,18 @@ export class ToursService {
         console.log('deleted');
       });
     }
+  }
+
+  async list() {
+    return await this.tourRepository.find();
+  }
+
+  async getTour(id: number) {
+    const row = await this.tourRepository.findOne({
+      where: { id },
+      relations: { images: true },
+    });
+    console.log('tour', row);
+    return row;
   }
 }
