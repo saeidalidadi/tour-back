@@ -14,11 +14,16 @@ import { CreateTourDto } from './dto/create-tour.dto';
 import { File, FileInterceptor } from '@nest-lab/fastify-multer';
 import { ToursService } from './tours.service';
 import { JwtAuthGuard } from '../auth/auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { Role } from '../auth/enums/roles.enum';
+import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('tours')
 export class ToursController {
   constructor(private readonly tourService: ToursService) {}
   @Post()
+  @Roles(Role.Leader)
+  @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
   async create(@Body() createTourDto: any, @Request() req: any) {
     return this.tourService.createTour(createTourDto, req.user.id);

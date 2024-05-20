@@ -47,4 +47,8 @@ export class AuthService {
       user: { firstName: user.firstName },
     };
   }
+
+  async getUserRoles(userID: number) {
+    return (await this.userService.findOneById(userID)).roles;
+  }
 }

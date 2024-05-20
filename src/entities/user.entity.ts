@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
 export class User {
@@ -20,6 +20,6 @@ export class User {
   @Column({ type: 'varchar' })
   salt?: string;
 
-  @Column({ type: 'bool', default: false })
-  isProvider?: boolean;
+  @Column({ name: 'roles', nullable: true })
+  roles: string;
 }

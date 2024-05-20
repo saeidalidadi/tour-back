@@ -22,11 +22,6 @@ export class ToursService {
   ) {}
 
   async createTour(tour: CreateTourDto, userId: number) {
-    const isProvider = await this.userService.isProvider(userId);
-    console.log('is provider', isProvider);
-    if (!isProvider) {
-      throw new UnauthorizedException();
-    }
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

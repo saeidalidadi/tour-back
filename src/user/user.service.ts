@@ -18,7 +18,6 @@ export class UserService {
     userData.lastName = user.lastName;
     userData.password = user.password;
     userData.salt = user.salt;
-    userData.isProvider = user.userType === 'PROVIDER';
     return await this.usersRepository.save(userData);
   }
 
@@ -33,10 +32,5 @@ export class UserService {
   }
   async getProfile(id: number) {
     return await this.usersRepository.findOne({ where: { id: id } });
-  }
-
-  async isProvider(userId) {
-    return (await this.usersRepository.findOne({ where: { id: userId } }))
-      .isProvider;
   }
 }

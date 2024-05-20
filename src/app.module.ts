@@ -9,6 +9,8 @@ import entities from './entities/index';
 import { ToursModule } from './tours/tours.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './auth/roles.guard';
 
 @Module({
   imports: [
