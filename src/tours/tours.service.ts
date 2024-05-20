@@ -10,6 +10,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
 import { UserService } from '../user/user.service';
+import { User } from '../entities';
 
 @Injectable()
 export class ToursService {
@@ -32,9 +33,9 @@ export class ToursService {
     tourEntity.startDate = new Date(Number(tour.duration.from) * 1000);
     tourEntity.finishDate = new Date(Number(tour.duration.to) * 1000);
     tourEntity.price = tour.price;
+    tourEntity.owner = { id: userId } as User;
     try {
       const result = await queryRunner.manager.save(tourEntity);
-
       await queryRunner.commitTransaction();
 
       const t = new Tour();

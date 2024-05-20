@@ -1,4 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 import { ImageEntity } from './images.entity';
 
@@ -29,4 +36,7 @@ export class Tour {
   // @JoinColumn({ name: 'user_id' })
   // @ManyToOne('User', 'pages', {})
   // user?: User;
+  @ManyToOne(() => User, (user) => user.tours)
+  @JoinColumn({ name: 'owner_id' })
+  owner?: User;
 }

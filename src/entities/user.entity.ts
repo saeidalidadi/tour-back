@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { Tour } from './tour.entity';
 
 @Entity('users')
 export class User {
@@ -22,4 +30,7 @@ export class User {
 
   @Column({ name: 'roles', nullable: true })
   roles: string;
+
+  @OneToMany(() => Tour, (tour) => tour.owner, { cascade: true })
+  tours?: Tour[];
 }
