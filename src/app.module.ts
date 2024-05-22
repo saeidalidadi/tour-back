@@ -11,6 +11,7 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/roles.guard';
+import { LeaderModule } from './leader/leader.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { RolesGuard } from './auth/roles.guard';
     }),
     ToursModule,
     AuthModule,
+    LeaderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

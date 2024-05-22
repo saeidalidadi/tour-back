@@ -14,5 +14,6 @@ import { AuthModule } from '../auth/auth.module';
   ],
   controllers: [ToursController],
   providers: [ToursService],
+  exports: [ToursService],
 })
 export class ToursModule {}

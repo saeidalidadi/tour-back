@@ -29,6 +29,9 @@ export class Tour {
   @Column({ type: 'int4' })
   price: number;
 
+  @Column({ type: 'boolean', default: false })
+  accepted: boolean;
+
   @OneToMany(() => ImageEntity, (photo) => photo.tour, { cascade: true })
   images?: ImageEntity[];
   // @Column({ type: 'simple-array', array: true })

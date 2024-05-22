@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
 import * as sharp from 'sharp';
 import { File } from '@nest-lab/fastify-multer';
@@ -89,6 +89,18 @@ export class ToursService {
     }
   }
 
+  async listPublic(page: number = 1) {
+    console.log('page is ', page);
+    const skip = (page - 1) * 5;
+    const [tours, count] = await this.tourRepository.findAndCount({
+      where: { accepted: true },
+      skip,
+      take: 5,
+    });
+    console.log('tours result', tours);
+    return { list: tours, total: count };
+  }
+
   async list() {
     return await this.tourRepository.find();
   }
@@ -100,5 +112,22 @@ export class ToursService {
     });
     console.log('tour', row);
     return row;
+  }
+
+  async accept(tourId: number) {
+    const result = await this.tourRepository.update(tourId, { accepted: true });
+    return result;
+  }
+
+  async getLeaderTours(useId: number) {
+    const owner = new User();
+    owner.id = useId;
+    return await this.tourRepository.find({ where: { owner } });
+  }
+
+  async getTourImages(tourId: number) {
+    return this.imageRepository.find({
+      where: { tour: { id: tourId } as Tour },
+    });
   }
 }
