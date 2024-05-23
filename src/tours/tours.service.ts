@@ -90,14 +90,13 @@ export class ToursService {
   }
 
   async listPublic(page: number = 1) {
-    console.log('page is ', page);
     const skip = (page - 1) * 5;
     const [tours, count] = await this.tourRepository.findAndCount({
       where: { accepted: true },
       skip,
       take: 5,
     });
-    console.log('tours result', tours);
+
     return { list: tours, total: count };
   }
 
