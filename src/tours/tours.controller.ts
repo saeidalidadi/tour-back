@@ -12,7 +12,6 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { CreateTourDto } from './dto/create-tour.dto';
 import { File, FileInterceptor } from '@nest-lab/fastify-multer';
 import { ToursService } from './tours.service';
 import { JwtAuthGuard } from '../auth/auth.guard';
@@ -78,15 +77,23 @@ export class ToursController {
   @Roles(Role.Admin)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  async tourList() {
-    return await this.tourService.list();
+  async tourList(@Query('page') page: number) {
+    return await this.tourService.list(page);
   }
 
   @Get(':id/images')
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Leader)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
   async getImages(@Param('id') tourId: number) {
     return await this.tourService.getTourImages(tourId);
+  }
+
+  @Get(':id/me')
+  @Roles(Role.Leader)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  getTourById(@Request() req: any, @Param('id') tourId: number) {
+    return this.tourService.getLeaderTourById(req.user.id, tourId);
   }
 }

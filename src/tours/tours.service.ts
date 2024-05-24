@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
-import { UserService } from '../user/user.service';
 import { User } from '../entities';
 
 @Injectable()
@@ -19,7 +18,6 @@ export class ToursService {
     @InjectRepository(ImageEntity)
     private readonly imageRepository: Repository<ImageEntity>,
     private dataSource: DataSource,
-    private readonly userService: UserService,
   ) {}
 
   async createTour(tour: CreateTourDto, userId: number) {
@@ -100,8 +98,13 @@ export class ToursService {
     return { list: tours, total: count };
   }
 
-  async list() {
-    return await this.tourRepository.find();
+  async list(page: number) {
+    const skip = (Number(page) - 1) * 10;
+    const [tours, count] = await this.tourRepository.findAndCount({
+      skip,
+      take: 10,
+    });
+    return { list: tours, total: count };
   }
 
   async getTour(id: number) {
@@ -127,6 +130,14 @@ export class ToursService {
   async getTourImages(tourId: number) {
     return this.imageRepository.find({
       where: { tour: { id: tourId } as Tour },
+    });
+  }
+
+  async getLeaderTourById(leaderId: number, tourId: number) {
+    const user = new User();
+    user.id = leaderId;
+    return await this.tourRepository.findOne({
+      where: { id: tourId, owner: user },
     });
   }
 }

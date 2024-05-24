@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserDto } from './user.dto';
+import { Role } from '../auth/enums/roles.enum';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,9 @@ export class UserService {
     userData.lastName = user.lastName;
     userData.password = user.password;
     userData.salt = user.salt;
+    if (user.userType == 'PROVIDER') {
+      userData.roles = 'leader';
+    }
     return await this.usersRepository.save(userData);
   }
 
@@ -32,5 +36,12 @@ export class UserService {
   }
   async getProfile(id: number) {
     return await this.usersRepository.findOne({ where: { id: id } });
+  }
+
+  async findByRole(role: Role) {
+    const [list, count] = await this.usersRepository.findAndCount({
+      where: { roles: role },
+    });
+    return { list, total: count };
   }
 }
