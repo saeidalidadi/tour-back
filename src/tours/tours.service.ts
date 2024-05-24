@@ -10,6 +10,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
 import { User } from '../entities';
+import { TourStatus } from './enums';
 
 @Injectable()
 export class ToursService {
@@ -139,5 +140,20 @@ export class ToursService {
     return await this.tourRepository.findOne({
       where: { id: tourId, owner: user },
     });
+  }
+
+  async setStatus(tourId: number, leaderId: number, status: TourStatus) {
+    const result = await this.dataSource
+      .createQueryBuilder()
+      .update(Tour)
+      .set({
+        isPublished: status === TourStatus.PUBLISHED ? true : false,
+      })
+      .where('id = :tourId', { tourId })
+      .andWhere('owner_id = :ownerId', { ownerId: leaderId })
+      .andWhere('accepted = :accepted', { accepted: true })
+      .execute();
+    console.log('tour status____', result);
+    return result;
   }
 }

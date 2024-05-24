@@ -32,6 +32,9 @@ export class Tour {
   @Column({ type: 'boolean', default: false })
   accepted: boolean;
 
+  @Column({ name: 'is_published', type: 'boolean', default: false })
+  isPublished: boolean;
+
   @OneToMany(() => ImageEntity, (photo) => photo.tour, { cascade: true })
   images?: ImageEntity[];
   // @Column({ type: 'simple-array', array: true })

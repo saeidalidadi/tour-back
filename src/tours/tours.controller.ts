@@ -18,6 +18,7 @@ import { JwtAuthGuard } from '../auth/auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/enums/roles.enum';
 import { RolesGuard } from '../auth/roles.guard';
+import { TourStatus } from './enums';
 
 @Controller('tours')
 export class ToursController {
@@ -95,5 +96,17 @@ export class ToursController {
   @UseGuards(JwtAuthGuard)
   getTourById(@Request() req: any, @Param('id') tourId: number) {
     return this.tourService.getLeaderTourById(req.user.id, tourId);
+  }
+
+  @Put(':id/status')
+  @Roles(Role.Leader)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  publishTour(
+    @Param('id') tourId: number,
+    @Query('mode') mode: TourStatus,
+    @Request() req: any,
+  ) {
+    return this.tourService.setStatus(tourId, req.user.id, mode);
   }
 }
