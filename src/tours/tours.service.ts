@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
 import * as sharp from 'sharp';
-import { File } from '@nest-lab/fastify-multer';
 import { v4 as uuid4 } from 'uuid';
 import { join } from 'path';
 import { existsSync, unlink } from 'fs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, FindOneOptions, Repository } from 'typeorm';
 import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
 import { User } from '../entities';
@@ -21,7 +20,11 @@ export class ToursService {
     private dataSource: DataSource,
   ) {}
 
-  async createTour(tour: CreateTourDto, userId: number) {
+  async createTour(
+    images: Array<Express.Multer.File>,
+    tour: CreateTourDto,
+    leaderId: number,
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -32,18 +35,20 @@ export class ToursService {
     tourEntity.startDate = new Date(Number(tour.duration.from) * 1000);
     tourEntity.finishDate = new Date(Number(tour.duration.to) * 1000);
     tourEntity.price = tour.price;
-    tourEntity.owner = { id: userId } as User;
+    tourEntity.owner = { id: leaderId } as User;
     try {
       const result = await queryRunner.manager.save(tourEntity);
       await queryRunner.commitTransaction();
 
+      const imagesUUID = await this.uploadImages(images);
+      console.log('image uuids ----', imagesUUID);
       const t = new Tour();
       t.id = result.id;
-      const images = tour.images.map((imageID) => ({
+      const imagesData = imagesUUID.map((imageID) => ({
         path: imageID,
         tour: t,
       }));
-      const imageRows = this.imageRepository.create(images);
+      const imageRows = this.imageRepository.create(imagesData);
       const imageQueryResult = await queryRunner.manager.save(imageRows);
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -60,24 +65,25 @@ export class ToursService {
     return path;
   }
 
-  async uploadImage(file: File) {
-    const name = uuid4();
-    const path = this.imagesPath(name);
+  async uploadImages(files: Array<Express.Multer.File>) {
+    const uuids = [];
+    for (const file of files) {
+      const uuid = uuid4();
+      const path = this.imagesPath(uuid);
+      sharp(file.buffer, { failOnError: false })
+        //   .resize({ fit: sharp.fit.contain, width: 150 })
+        .jpeg({ quality: 100 })
+        .toFile(path);
+      uuids.push(uuid);
+    }
 
-    sharp(file.buffer, { failOnError: false })
-      //   .resize({ fit: sharp.fit.contain, width: 150 })
-      .jpeg({ quality: 100 })
-      .toFile(path);
-    return {
-      success: true,
-      imageID: name,
-      name: file.originalname,
-    };
+    return uuids;
   }
 
-  async removeImage(imageUUID: string) {
+  async removeImage(imageUUID: string, leaderId: number) {
     const path = this.imagesPath(imageUUID);
     console.log('remove image from ', path);
+    // const leader = await this.use;
     if (existsSync(path)) {
       unlink(path, (err) => {
         if (err) {
@@ -88,14 +94,27 @@ export class ToursService {
     }
   }
 
+  async removeToursImage(imageUUID, leaderId) {
+    // const path = this.imagesPath(imageUUID);
+    // console.log('remove image from ', path);
+    // const leader = await this.use;
+    // if (existsSync(path)) {
+    //   unlink(path, (err) => {
+    //     if (err) {
+    //       console.log(err);
+    //     }
+    //     console.log('deleted');
+    //   });
+    // }
+  }
   async listPublic(page: number = 1) {
     const skip = (page - 1) * 5;
     const [tours, count] = await this.tourRepository.findAndCount({
-      where: { accepted: true },
+      where: { accepted: true, isPublished: true },
       skip,
       take: 5,
     });
-
+    console.log('tour list____', tours);
     return { list: tours, total: count };
   }
 
@@ -134,12 +153,17 @@ export class ToursService {
     });
   }
 
-  async getLeaderTourById(leaderId: number, tourId: number) {
+  async getLeaderTourById(leaderId: number, tourId: number, query: any = {}) {
     const user = new User();
     user.id = leaderId;
-    return await this.tourRepository.findOne({
+    const queryObject: FindOneOptions<Tour> = {
       where: { id: tourId, owner: user },
-    });
+    };
+    if (query.populate === 'images') {
+      queryObject.relations = { images: true };
+    }
+    console.log('query options___', queryObject);
+    return await this.tourRepository.findOne(queryObject);
   }
 
   async setStatus(tourId: number, leaderId: number, status: TourStatus) {
@@ -153,7 +177,7 @@ export class ToursService {
       .andWhere('owner_id = :ownerId', { ownerId: leaderId })
       .andWhere('accepted = :accepted', { accepted: true })
       .execute();
-    console.log('tour status____', result);
+
     return result;
   }
 }

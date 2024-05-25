@@ -11,43 +11,53 @@ import {
   Request,
   Put,
   Query,
+  UploadedFiles,
 } from '@nestjs/common';
-import { File, FileInterceptor } from '@nest-lab/fastify-multer';
 import { ToursService } from './tours.service';
 import { JwtAuthGuard } from '../auth/auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/enums/roles.enum';
 import { RolesGuard } from '../auth/roles.guard';
 import { TourStatus } from './enums';
+// import {
+//   AnyFilesInterceptor,
+// } from '@nestjs/platform-express';
+import { AnyFilesInterceptor } from '@nest-lab/fastify-multer';
 
 @Controller('tours')
 export class ToursController {
   constructor(private readonly tourService: ToursService) {}
-  @Post()
+
+  @Post('')
+  @UseInterceptors(AnyFilesInterceptor())
   @Roles(Role.Leader, Role.Admin)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  async create(@Body() createTourDto: any, @Request() req: any) {
-    return this.tourService.createTour(createTourDto, req.user.id);
-  }
-
-  @Post('/images')
-  @UseInterceptors(FileInterceptor('image'))
-  //   @UseGuards(JwtAuthGuard)
   async upload(
-    @UploadedFile()
-    file: File,
+    @Body() createTourDto: any,
+    @Request() req: any,
+    @UploadedFiles()
+    files: Array<Express.Multer.File>,
   ) {
-    console.log(file);
-    return this.tourService.uploadImage(file);
+    console.log(createTourDto);
+    return this.tourService.createTour(files, createTourDto, req.user.id);
   }
 
   @Delete('/images/:uuid')
-  //   @UseGuards(JwtAuthGuard)
-  deleteImage(@Param('uuid') imageUUID: string) {
-    return this.tourService.removeImage(imageUUID);
+  @Roles(Role.Leader)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  deleteImage(@Param('uuid') imageUUID: string, @Request() req: any) {
+    return this.tourService.removeImage(imageUUID, req.user.id);
   }
 
+  @Delete(':id/images/:uuid')
+  @Roles(Role.Leader)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  deleteImageOfTour(@Param('uuid') imageUUID: string, @Request() req: any) {
+    return this.tourService.removeToursImage(imageUUID, req.user.id);
+  }
   @Get('/public')
   async tourListPublic(@Query('page') page: number) {
     return await this.tourService.listPublic(page);
@@ -94,8 +104,14 @@ export class ToursController {
   @Roles(Role.Leader)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  getTourById(@Request() req: any, @Param('id') tourId: number) {
-    return this.tourService.getLeaderTourById(req.user.id, tourId);
+  getTourById(
+    @Request() req: any,
+    @Param('id') tourId: number,
+    @Query('populate') populate: string,
+  ) {
+    return this.tourService.getLeaderTourById(req.user.id, tourId, {
+      populate,
+    });
   }
 
   @Put(':id/status')
