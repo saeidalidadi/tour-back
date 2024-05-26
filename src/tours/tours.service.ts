@@ -114,7 +114,6 @@ export class ToursService {
       skip,
       take: 5,
     });
-    console.log('tour list____', tours);
     return { list: tours, total: count };
   }
 
@@ -123,6 +122,7 @@ export class ToursService {
     const [tours, count] = await this.tourRepository.findAndCount({
       skip,
       take: 10,
+      relations: { owner: true },
     });
     return { list: tours, total: count };
   }
@@ -132,7 +132,7 @@ export class ToursService {
       where: { id },
       relations: { images: true },
     });
-    console.log('tour', row);
+
     return row;
   }
 
@@ -141,10 +141,16 @@ export class ToursService {
     return result;
   }
 
-  async getLeaderTours(useId: number) {
+  async getLeaderTours(leaderId: number, page: number) {
+    const skip = (Number(page) - 1) * 10;
     const owner = new User();
-    owner.id = useId;
-    return await this.tourRepository.find({ where: { owner } });
+    owner.id = leaderId;
+    const [tours, count] = await this.tourRepository.findAndCount({
+      where: { owner },
+      skip,
+      take: 10,
+    });
+    return { list: tours, total: count };
   }
 
   async getTourImages(tourId: number) {
@@ -162,7 +168,7 @@ export class ToursService {
     if (query.populate === 'images') {
       queryObject.relations = { images: true };
     }
-    console.log('query options___', queryObject);
+
     return await this.tourRepository.findOne(queryObject);
   }
 

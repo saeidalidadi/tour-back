@@ -9,8 +9,8 @@ export class LeaderService {
     private readonly tourService: ToursService,
     private readonly userService: UserService,
   ) {}
-  async getLeaderTours(leaderId: number) {
-    return await this.tourService.getLeaderTours(leaderId);
+  async getLeaderTours(leaderId: number, page: number) {
+    return await this.tourService.getLeaderTours(leaderId, page);
   }
 
   async list() {

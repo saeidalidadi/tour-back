@@ -36,7 +36,7 @@ import { AppLoggerMiddleware } from './middlewares/logger.middleware';
           password: database.password,
           database: database.name,
           entities: [...entities],
-          synchronize: true,
+          synchronize: process.env.NODE_ENV === 'development',
         };
       },
       inject: [ConfigService],
@@ -48,9 +48,8 @@ import { AppLoggerMiddleware } from './middlewares/logger.middleware';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
-//  implements NestModule {
-// configure(consumer: MiddlewareConsumer): void {
-//   consumer.apply(AppLoggerMiddleware).forRoutes('*');
-// }
-// }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(AppLoggerMiddleware).forRoutes('*');
+  }
+}

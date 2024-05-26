@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Param } from '@nestjs/common';
+import { Controller, Get, UseGuards, Param, Query } from '@nestjs/common';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/enums/roles.enum';
 import { RolesGuard } from '../auth/roles.guard';
@@ -13,8 +13,8 @@ export class LeaderController {
   @Roles(Role.Admin)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  getMyTours(@Param('id') leaderId: number) {
-    return this.leaderService.getLeaderTours(leaderId);
+  getMyTours(@Param('id') leaderId: number, @Query('page') page: number) {
+    return this.leaderService.getLeaderTours(leaderId, page);
   }
 
   @Get()

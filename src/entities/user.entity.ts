@@ -1,10 +1,23 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  UpdateDateColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { Tour } from './tour.entity';
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id?: number;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @CreateDateColumn()
+  createdAt: Date;
 
   @Column({ name: 'first_name', type: 'varchar', nullable: true })
   firstName?: string;
