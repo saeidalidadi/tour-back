@@ -108,13 +108,28 @@ export class ToursService {
     //   });
     // }
   }
+
   async listPublic(page: number = 1) {
     const skip = (page - 1) * 5;
-    const [tours, count] = await this.tourRepository.findAndCount({
-      where: { status: TourStatus.PUBLISHED },
-      skip,
-      take: 5,
-    });
+    const [tours, count] = await this.tourRepository
+      .createQueryBuilder('tour')
+      .leftJoinAndSelect('tour.owner', 'owner')
+      .where('tour.status = :status', { status: TourStatus.PUBLISHED })
+      .skip(skip)
+      .take(5)
+      .orderBy('tour.updatedAt', 'DESC')
+      .select([
+        'tour.id',
+        'tour.tourName',
+        'tour.tourDescription',
+        'tour.price',
+        'tour.startDate',
+        'tour.updatedAt',
+        'tour.finishDate',
+      ])
+      .addSelect(['owner.firstName', 'owner.lastName'])
+      .getManyAndCount();
+
     return { list: tours, total: count };
   }
 
