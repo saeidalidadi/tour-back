@@ -29,6 +29,9 @@ export class Tour {
   @Column({ type: 'int4' })
   price: number;
 
+  @Column({ name: 'tour_attendance', default: 1, type: 'int4' })
+  tourAttendance: number;
+
   @Column({ type: 'boolean', default: false })
   accepted: boolean;
 

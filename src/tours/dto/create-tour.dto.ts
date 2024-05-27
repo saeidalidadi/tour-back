@@ -22,6 +22,9 @@ export class CreateTourDto {
   @IsNumber()
   price: number;
 
+  @IsNumber()
+  tourAttendance: number;
+
   @IsArray()
   tags: Array<string>;
 

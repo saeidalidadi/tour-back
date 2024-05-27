@@ -23,6 +23,7 @@ import { TourStatus } from './enums';
 //   AnyFilesInterceptor,
 // } from '@nestjs/platform-express';
 import { AnyFilesInterceptor } from '@nest-lab/fastify-multer';
+import { CreateTourDto } from './dto/create-tour.dto';
 
 @Controller('tours')
 export class ToursController {
@@ -34,7 +35,7 @@ export class ToursController {
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
   async upload(
-    @Body() createTourDto: any,
+    @Body() createTourDto: CreateTourDto,
     @Request() req: any,
     @UploadedFiles()
     files: Array<Express.Multer.File>,

@@ -35,6 +35,7 @@ export class ToursService {
     tourEntity.startDate = new Date(Number(tour.duration.from) * 1000);
     tourEntity.finishDate = new Date(Number(tour.duration.to) * 1000);
     tourEntity.price = tour.price;
+    tourEntity.tourAttendance = tour.tourAttendance;
     tourEntity.owner = { id: leaderId } as User;
     try {
       const result = await queryRunner.manager.save(tourEntity);
@@ -166,6 +167,7 @@ export class ToursService {
       where: { id: tourId, owner: user },
     };
     if (query.populate === 'images') {
+      console.log('images____', query);
       queryObject.relations = { images: true };
     }
 

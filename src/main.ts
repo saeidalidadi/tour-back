@@ -11,6 +11,7 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+  console.log('process ', process.env.NODE_ENV);
   app.setGlobalPrefix('api');
   app.enableCors({ origin: '*' });
   app.register(multipart);
