@@ -1,4 +1,1 @@
-export enum TourStatus {
-  PUBLISHED = 'published',
-  UNPUBLISHED = 'unpublished',
-}
+export { TourStatus } from '../entities/tour.entity';

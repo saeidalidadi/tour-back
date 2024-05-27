@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
 import * as sharp from 'sharp';
 import { v4 as uuid4 } from 'uuid';
 import { join } from 'path';
 import { existsSync, unlink } from 'fs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, FindOneOptions, Repository } from 'typeorm';
+import { Brackets, DataSource, FindOneOptions, Repository } from 'typeorm';
 import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
-import { User } from '../entities';
+import { Leader, User } from '../entities';
 import { TourStatus } from './enums';
 
 @Injectable()
@@ -111,7 +111,7 @@ export class ToursService {
   async listPublic(page: number = 1) {
     const skip = (page - 1) * 5;
     const [tours, count] = await this.tourRepository.findAndCount({
-      where: { accepted: true, isPublished: true },
+      where: { status: TourStatus.PUBLISHED },
       skip,
       take: 5,
     });
@@ -139,8 +139,14 @@ export class ToursService {
   }
 
   async accept(tourId: number) {
-    const result = await this.tourRepository.update(tourId, { accepted: true });
+    const result = await this.tourRepository.update(tourId, {
+      status: TourStatus.ACCEPTED,
+    });
     return result;
+  }
+
+  async rejectTour(tourId: number, data) {
+    console.log('data', data);
   }
 
   async getLeaderTours(leaderId: number, page: number) {
@@ -168,7 +174,6 @@ export class ToursService {
       where: { id: tourId, owner: user },
     };
     if (query.populate === 'images') {
-      console.log('images____', query);
       queryObject.relations = { images: true };
     }
 
@@ -176,15 +181,28 @@ export class ToursService {
   }
 
   async setStatus(tourId: number, leaderId: number, status: TourStatus) {
+    const leader = new Leader();
+    leader.id = leaderId;
+    const tour = await this.tourRepository.findOne({
+      where: { id: tourId, owner: leader },
+    });
+    if (!tour) {
+      throw new NotFoundException('tour not found');
+    }
     const result = await this.dataSource
       .createQueryBuilder()
       .update(Tour)
       .set({
-        isPublished: status === TourStatus.PUBLISHED ? true : false,
+        status:
+          status === TourStatus.PUBLISHED
+            ? TourStatus.PUBLISHED
+            : TourStatus.UNPUBLISHED,
       })
       .where('id = :tourId', { tourId })
       .andWhere('owner_id = :ownerId', { ownerId: leaderId })
-      .andWhere('accepted = :accepted', { accepted: true })
+      .andWhere('status NOT IN (:status)', {
+        status: [TourStatus.REJECTED, TourStatus.RELEASED],
+      })
       .execute();
 
     return result;

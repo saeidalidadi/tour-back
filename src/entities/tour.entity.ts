@@ -11,6 +11,14 @@ import {
 import { User } from './user.entity';
 import { ImageEntity } from './images.entity';
 
+export enum TourStatus {
+  RELEASED = 'released',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected',
+  PUBLISHED = 'published',
+  UNPUBLISHED = 'unpublished',
+}
+
 @Entity('tours')
 export class Tour {
   @PrimaryGeneratedColumn()
@@ -40,11 +48,8 @@ export class Tour {
   @Column({ name: 'tour_attendance', default: 1, type: 'int4' })
   tourAttendance: number;
 
-  @Column({ type: 'boolean', default: false })
-  accepted: boolean;
-
-  @Column({ name: 'is_published', type: 'boolean', default: false })
-  isPublished: boolean;
+  @Column({ enum: TourStatus, default: TourStatus.RELEASED })
+  status: TourStatus;
 
   @OneToMany(() => ImageEntity, (photo) => photo.tour, { cascade: true })
   images?: ImageEntity[];

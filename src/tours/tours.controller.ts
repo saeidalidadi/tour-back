@@ -78,6 +78,14 @@ export class ToursController {
     return this.tourService.accept(tourId);
   }
 
+  @Put(':id/reject')
+  @Roles(Role.Admin)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  rejectTour(@Param('id') tourId: number, @Body() rejectionData: any) {
+    return this.tourService.rejectTour(tourId, rejectionData);
+  }
+
   @Get('/me')
   @Roles(Role.Leader)
   @UseGuards(RolesGuard)
