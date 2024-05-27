@@ -121,6 +121,7 @@ export class ToursService {
   async list(page: number) {
     const skip = (Number(page) - 1) * 10;
     const [tours, count] = await this.tourRepository.findAndCount({
+      order: { updatedAt: 'DESC' },
       skip,
       take: 10,
       relations: { owner: true },

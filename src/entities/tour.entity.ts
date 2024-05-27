@@ -1,10 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { ImageEntity } from './images.entity';
@@ -13,6 +15,12 @@ import { ImageEntity } from './images.entity';
 export class Tour {
   @PrimaryGeneratedColumn()
   id?: number;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @CreateDateColumn()
+  createdAt: Date;
 
   @Column({ name: 'tour_name' })
   tourName?: string;
