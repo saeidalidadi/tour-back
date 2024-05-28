@@ -26,6 +26,9 @@ export class Leader {
   @Column()
   mobile: string;
 
+  @Column({ type: 'float', default: 0 })
+  stars: number;
+
   @OneToOne(() => User)
   @JoinColumn()
   user: User;

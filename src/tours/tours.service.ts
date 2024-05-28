@@ -5,7 +5,7 @@ import { v4 as uuid4 } from 'uuid';
 import { join } from 'path';
 import { existsSync, unlink } from 'fs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, DataSource, FindOneOptions, Repository } from 'typeorm';
+import { DataSource, FindOneOptions, Repository } from 'typeorm';
 import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
 import { Leader, User } from '../entities';
@@ -40,9 +40,8 @@ export class ToursService {
     try {
       const result = await queryRunner.manager.save(tourEntity);
       await queryRunner.commitTransaction();
-
       const imagesUUID = await this.uploadImages(images);
-      console.log('image uuids ----', imagesUUID);
+
       const t = new Tour();
       t.id = result.id;
       const imagesData = imagesUUID.map((imageID) => ({
@@ -121,13 +120,14 @@ export class ToursService {
       .select([
         'tour.id',
         'tour.tourName',
+        'tour.tourAttendance',
         'tour.tourDescription',
         'tour.price',
         'tour.startDate',
         'tour.updatedAt',
         'tour.finishDate',
       ])
-      .addSelect(['owner.firstName', 'owner.lastName'])
+      .addSelect(['owner.firstName', 'owner.lastName', 'owner.id'])
       .getManyAndCount();
 
     return { list: tours, total: count };

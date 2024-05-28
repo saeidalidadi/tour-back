@@ -1,4 +1,11 @@
-import { Controller, Get, UseGuards, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Param,
+  Query,
+  Request,
+} from '@nestjs/common';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/enums/roles.enum';
 import { RolesGuard } from '../auth/roles.guard';
@@ -24,5 +31,13 @@ export class LeaderController {
   list() {
     console.log('leaders api>>>');
     return this.leaderService.list();
+  }
+
+  @Get('/profile')
+  @Roles(Role.Leader)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  getMyProfile(@Request() req: any) {
+    return this.leaderService.getMyProfile(req.user.id);
   }
 }
