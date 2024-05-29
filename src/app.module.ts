@@ -13,14 +13,19 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './auth/roles.guard';
 import { LeaderModule } from './leader/leader.module';
 import { AppLoggerMiddleware } from './middlewares/logger.middleware';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '/public'),
-      serveStaticOptions: { index: false },
-      serveRoot: '/public',
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', '/public'),
+    //   serveStaticOptions: {
+    //     index: false,
+    //     cacheControl: false,
+    //     immutable: false,
+    //   },
+    //   serveRoot: '/public/',
+    // }),
     ConfigModule.forRoot({
       load: [configuration],
     }),
@@ -44,6 +49,7 @@ import { AppLoggerMiddleware } from './middlewares/logger.middleware';
     ToursModule,
     AuthModule,
     LeaderModule,
+    ImagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

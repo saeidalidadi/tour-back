@@ -10,6 +10,7 @@ import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
 import { Leader, User } from '../entities';
 import { TourStatus } from './enums';
+import { ImagesService } from '../images/images.service';
 
 @Injectable()
 export class ToursService {
@@ -17,6 +18,7 @@ export class ToursService {
     @InjectRepository(Tour) private readonly tourRepository: Repository<Tour>,
     @InjectRepository(ImageEntity)
     private readonly imageRepository: Repository<ImageEntity>,
+    private readonly imageService: ImagesService,
     private dataSource: DataSource,
   ) {}
 
@@ -40,12 +42,12 @@ export class ToursService {
     try {
       const result = await queryRunner.manager.save(tourEntity);
       await queryRunner.commitTransaction();
-      const imagesUUID = await this.uploadImages(images);
+      const imagesUUID = await this.imageService.uploadImages(images);
 
       const t = new Tour();
       t.id = result.id;
       const imagesData = imagesUUID.map((imageID) => ({
-        path: imageID,
+        path: 'tours/' + imageID,
         tour: t,
       }));
       const imageRows = this.imageRepository.create(imagesData);
@@ -57,55 +59,6 @@ export class ToursService {
       await queryRunner.release();
       return {};
     }
-  }
-
-  private imagesPath(name) {
-    const dir = process.cwd();
-    const path = join(`${dir}`, `/public/${name}.jpg`);
-    return path;
-  }
-
-  async uploadImages(files: Array<Express.Multer.File>) {
-    const uuids = [];
-    for (const file of files) {
-      const uuid = uuid4();
-      const path = this.imagesPath(uuid);
-      sharp(file.buffer, { failOnError: false })
-        //   .resize({ fit: sharp.fit.contain, width: 150 })
-        .jpeg({ quality: 100 })
-        .toFile(path);
-      uuids.push(uuid);
-    }
-
-    return uuids;
-  }
-
-  async removeImage(imageUUID: string, leaderId: number) {
-    const path = this.imagesPath(imageUUID);
-    console.log('remove image from ', path);
-    // const leader = await this.use;
-    if (existsSync(path)) {
-      unlink(path, (err) => {
-        if (err) {
-          console.log(err);
-        }
-        console.log('deleted');
-      });
-    }
-  }
-
-  async removeToursImage(imageUUID, leaderId) {
-    // const path = this.imagesPath(imageUUID);
-    // console.log('remove image from ', path);
-    // const leader = await this.use;
-    // if (existsSync(path)) {
-    //   unlink(path, (err) => {
-    //     if (err) {
-    //       console.log(err);
-    //     }
-    //     console.log('deleted');
-    //   });
-    // }
   }
 
   async listPublic(page: number = 1) {
@@ -127,7 +80,12 @@ export class ToursService {
         'tour.updatedAt',
         'tour.finishDate',
       ])
-      .addSelect(['owner.firstName', 'owner.lastName', 'owner.id'])
+      .addSelect([
+        'owner.firstName',
+        'owner.lastName',
+        'owner.id',
+        'owner.avatar',
+      ])
       .getManyAndCount();
 
     return { list: tours, total: count };

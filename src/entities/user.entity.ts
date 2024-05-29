@@ -37,6 +37,9 @@ export class User {
   @Column({ name: 'roles', nullable: true })
   roles: string;
 
+  @Column({ name: 'avatar', type: 'character varying', default: '' })
+  avatar: string;
+
   @OneToMany(() => Tour, (tour) => tour.owner, { cascade: true })
   tours?: Tour[];
 }

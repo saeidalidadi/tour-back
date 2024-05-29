@@ -44,7 +44,12 @@ export class AuthService {
     const payload = { username: user.email, sub: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
-      user: { firstName: user.firstName, roles: user.roles.split(',') },
+      user: {
+        firstName: user.firstName,
+        roles: user.roles.split(','),
+        lastName: user.lastName,
+        avatar: user.avatar,
+      },
     };
   }
 

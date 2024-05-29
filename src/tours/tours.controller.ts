@@ -49,7 +49,7 @@ export class ToursController {
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
   deleteImage(@Param('uuid') imageUUID: string, @Request() req: any) {
-    return this.tourService.removeImage(imageUUID, req.user.id);
+    // return this.tourService.removeImage(imageUUID, req.user.id);
   }
 
   @Delete(':id/images/:uuid')

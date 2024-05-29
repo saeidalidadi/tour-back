@@ -5,12 +5,22 @@ import {
   Param,
   Query,
   Request,
+  Put,
+  Body,
+  UseInterceptors,
+  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/enums/roles.enum';
 import { RolesGuard } from '../auth/roles.guard';
 import { JwtAuthGuard } from '../auth/auth.guard';
 import { LeaderService } from './leader.service';
+import { UpdateLeaderDto } from './dto/update-leader.dto';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nest-lab/fastify-multer';
 
 @Controller('leaders')
 export class LeaderController {
@@ -39,5 +49,20 @@ export class LeaderController {
   @UseGuards(JwtAuthGuard)
   getMyProfile(@Request() req: any) {
     return this.leaderService.getMyProfile(req.user.id);
+  }
+
+  @Put('/profile')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'avatar', maxCount: 1 }]))
+  @Roles(Role.Leader)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  updateMyProfile(
+    @UploadedFiles()
+    files: { avatar?: Express.Multer.File },
+    @Body() leaderDto: UpdateLeaderDto,
+    @Request() req: any,
+  ) {
+    console.log('files___', files);
+    return this.leaderService.updateProfile(req.user.id, leaderDto, files);
   }
 }

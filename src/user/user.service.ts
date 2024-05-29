@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserDto } from './user.dto';
 import { Role } from '../auth/enums/roles.enum';
+import { ImagesService } from '../images/images.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private readonly imageService: ImagesService,
   ) {}
   async createUser(user: Partial<UserDto>): Promise<User> {
     console.log(user);
@@ -43,5 +45,26 @@ export class UserService {
       where: { roles: role },
     });
     return { list, total: count };
+  }
+
+  async updateAvatar(userId: number, path, storagePath) {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new NotFoundException();
+      }
+      await this.usersRepository.update(userId, { avatar: path });
+      const result = await this.imageService.removeImage(user.avatar);
+      // console.log('result ____', result);
+    } catch (err) {}
+  }
+
+  async getAvatar(userId: number) {
+    return await this.usersRepository.findOne({
+      where: { id: userId },
+      select: ['avatar'],
+    });
   }
 }

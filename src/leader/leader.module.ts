@@ -6,6 +6,7 @@ import { LeaderService } from './leader.service';
 import { UserModule } from '../user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Leader } from '../entities';
+import { ImagesModule } from '../images/images.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { Leader } from '../entities';
     ToursModule,
     UserModule,
     TypeOrmModule.forFeature([Leader]),
+    ImagesModule,
   ],
   controllers: [LeaderController],
   providers: [LeaderService],
