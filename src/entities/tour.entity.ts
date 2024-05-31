@@ -18,7 +18,13 @@ export enum TourStatus {
   PUBLISHED = 'published',
   UNPUBLISHED = 'unpublished',
 }
-
+export type TimelineItem = {
+  planDescription: string;
+  duration: {
+    from: string;
+    to: string;
+  };
+};
 @Entity('tours')
 export class Tour {
   @PrimaryGeneratedColumn()
@@ -50,6 +56,9 @@ export class Tour {
 
   @Column({ enum: TourStatus, default: TourStatus.RELEASED })
   status: TourStatus;
+
+  @Column({ type: 'json', default: '[]' })
+  timeline: TimelineItem[];
 
   @OneToMany(() => ImageEntity, (photo) => photo.tour, { cascade: true })
   images?: ImageEntity[];

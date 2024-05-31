@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { rejects } from 'assert';
 import { existsSync, unlink } from 'fs';
 import { join } from 'path';
 import * as sharp from 'sharp';
@@ -9,11 +8,11 @@ import { v4 as uuid4 } from 'uuid';
 export class ImagesService {
   constructor() {}
 
-  private imagesPath(name, format: 'jpg' | 'png' = 'jpg', inner: string = '') {
-    const dir = process.cwd();
-    const src = `${inner ? inner + '/' : ''}${name}.${format}`;
-    const path = join(`${dir}`, `/public/${src}`);
-    return [path, src];
+  private imagesPath(name, format: 'jpg' | 'png' = 'jpg', dir: string = '') {
+    const rootDir = process.cwd();
+    const path = join(dir, `${name}.${format}`);
+    const storagePath = join(`${rootDir}`, `/public/`, path);
+    return [storagePath, path];
   }
 
   private getFilePath(path: string) {
@@ -22,7 +21,7 @@ export class ImagesService {
     return originPath;
   }
 
-  async uploadImages(files: Array<Express.Multer.File>) {
+  async uploadImages(files: Array<Express.Multer.File>, dir: string = '') {
     const paths = [];
     for (const file of files) {
       const uuid = uuid4();
@@ -32,11 +31,11 @@ export class ImagesService {
       if (file.mimetype == 'image/jpeg') {
         console.log('format for jpg');
         sh.jpeg({ quality: 100 });
-        path = this.imagesPath(uuid, 'jpg');
+        path = this.imagesPath(uuid, 'jpg', dir);
       }
       if (file.mimetype == 'image/png') {
         sh.png({ quality: 100 });
-        path = this.imagesPath(uuid, 'png');
+        path = this.imagesPath(uuid, 'png', dir);
       }
 
       await sh.toFile(path[0]);
@@ -67,7 +66,7 @@ export class ImagesService {
     return path;
   }
 
-  async removeImage(path) {
+  async removeImage(path: string) {
     console.log('remove image from ', path);
     const origin = this.getFilePath(path);
     // const leader = await this.use;

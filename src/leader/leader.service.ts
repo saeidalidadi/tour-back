@@ -6,7 +6,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Leader, User } from '../entities';
 import { Repository } from 'typeorm';
 import { UpdateLeaderDto } from './dto/update-leader.dto';
-import * as sharp from 'sharp';
 import { ImagesService } from '../images/images.service';
 
 @Injectable()

@@ -9,7 +9,7 @@ export class TourDateRangeDto {
   to: string;
 }
 
-export class CreateTourDto {
+export class UpdateTourDto {
   @IsString()
   tourName: string;
 
@@ -29,7 +29,7 @@ export class CreateTourDto {
   tags: Array<string>;
 
   @IsArray()
-  images: Array<string>;
+  images: Array<{ deleted: string; id: number }>;
 
   @IsArray()
   timeline: any;

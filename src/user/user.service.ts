@@ -55,6 +55,7 @@ export class UserService {
       if (!user) {
         throw new NotFoundException();
       }
+      console.log('path', path, storagePath);
       await this.usersRepository.update(userId, { avatar: path });
       const result = await this.imageService.removeImage(user.avatar);
       // console.log('result ____', result);

@@ -4,7 +4,6 @@ import {
   Delete,
   Param,
   Post,
-  UploadedFile,
   UseInterceptors,
   Get,
   UseGuards,
@@ -19,11 +18,9 @@ import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/enums/roles.enum';
 import { RolesGuard } from '../auth/roles.guard';
 import { TourStatus } from './enums';
-// import {
-//   AnyFilesInterceptor,
-// } from '@nestjs/platform-express';
 import { AnyFilesInterceptor } from '@nest-lab/fastify-multer';
 import { CreateTourDto } from './dto/create-tour.dto';
+import { UpdateTourDto } from './dto/update-tour.dto';
 
 @Controller('tours')
 export class ToursController {
@@ -34,14 +31,30 @@ export class ToursController {
   @Roles(Role.Leader, Role.Admin)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  async upload(
+  async createTour(
     @Body() createTourDto: CreateTourDto,
     @Request() req: any,
     @UploadedFiles()
     files: Array<Express.Multer.File>,
   ) {
-    console.log(createTourDto);
+    // console.log('tour content____', createTourDto);
     return this.tourService.createTour(files, createTourDto, req.user.id);
+  }
+
+  @Put('/:id')
+  @UseInterceptors(AnyFilesInterceptor())
+  @Roles(Role.Leader, Role.Admin)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  async updateTour(
+    @Body() tourDto: UpdateTourDto,
+    @Param('id') tourId: number,
+    @Request() req: any,
+    @UploadedFiles()
+    files: Array<Express.Multer.File>,
+  ) {
+    console.log('tour content____', tourDto, files);
+    return this.tourService.updateTour(req.user.id, tourId, tourDto, files);
   }
 
   @Delete('/images/:uuid')
@@ -52,13 +65,13 @@ export class ToursController {
     // return this.tourService.removeImage(imageUUID, req.user.id);
   }
 
-  @Delete(':id/images/:uuid')
-  @Roles(Role.Leader)
-  @UseGuards(RolesGuard)
-  @UseGuards(JwtAuthGuard)
-  deleteImageOfTour(@Param('uuid') imageUUID: string, @Request() req: any) {
-    return this.tourService.removeToursImage(imageUUID, req.user.id);
-  }
+  // @Delete(':id/images/:uuid')
+  // @Roles(Role.Leader)
+  // @UseGuards(RolesGuard)
+  // @UseGuards(JwtAuthGuard)
+  // deleteImageOfTour(@Param('uuid') imageUUID: string, @Request() req: any) {
+  //   return this.tourService.removeToursImage(imageUUID, req.user.id);
+  // }
 
   @Get('/public')
   async tourListPublic(@Query('page') page: number) {
