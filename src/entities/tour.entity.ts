@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  VirtualColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { ImageEntity } from './images.entity';
@@ -62,12 +63,13 @@ export class Tour {
 
   @OneToMany(() => ImageEntity, (photo) => photo.tour, { cascade: true })
   images?: ImageEntity[];
-  // @Column({ type: 'simple-array', array: true })
-  // images: Array<string>;
-  // @JoinColumn({ name: 'user_id' })
-  // @ManyToOne('User', 'pages', {})
-  // user?: User;
+
   @ManyToOne(() => User, (user) => user.tours)
   @JoinColumn({ name: 'owner_id' })
   owner?: User;
+
+  @VirtualColumn({
+    query: (alias) => `substring(tour.tourDescription for 250)`,
+  })
+  subDescription: string;
 }

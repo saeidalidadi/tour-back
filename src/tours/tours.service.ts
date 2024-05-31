@@ -152,11 +152,11 @@ export class ToursService {
         'tour.id',
         'tour.tourName',
         'tour.tourAttendance',
-        'tour.tourDescription',
         'tour.price',
         'tour.startDate',
         'tour.updatedAt',
         'tour.finishDate',
+        'tour.subDescription',
       ])
       .addSelect([
         'owner.firstName',
