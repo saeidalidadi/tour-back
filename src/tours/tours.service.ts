@@ -41,16 +41,9 @@ export class ToursService {
     try {
       const result = await queryRunner.manager.save(tourEntity);
       await queryRunner.commitTransaction();
-      const imagesUUID = await this.imageService.uploadImages(images);
-
-      const t = new Tour();
-      t.id = result.id;
-      const imagesData = imagesUUID.map((imageID) => ({
-        path: 'tours/' + imageID,
-        tour: t,
-      }));
-      const imageRows = this.imageRepository.create(imagesData);
-      const imageQueryResult = await queryRunner.manager.save(imageRows);
+      await queryRunner.startTransaction();
+      const imagesData = await this.saveTourImages(result.id, images);
+      const imageQueryResult = await queryRunner.manager.save(imagesData);
 
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -140,7 +133,7 @@ export class ToursService {
     const t = new Tour();
     t.id = tourId;
     const imagesData = imagesUUID.map((imageID) => ({
-      path: 'tours/' + imageID,
+      path: imageID,
       tour: t,
     }));
     return this.imageRepository.create(imagesData);
