@@ -36,13 +36,6 @@ export class LeaderService {
   }
 
   async updateProfile(userId: number, data: UpdateLeaderDto, files) {
-    if (files.avatar) {
-      const avatar = await this.imageService.uploadImage(
-        files.avatar[0],
-        'avatars',
-        100,
-      );
-      await this.userService.updateAvatar(userId, avatar[1], avatar[0]);
-    }
+    await this.userService.updateAvatar(userId, files);
   }
 }

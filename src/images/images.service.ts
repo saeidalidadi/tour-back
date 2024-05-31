@@ -63,7 +63,7 @@ export class ImagesService {
 
     sh.toFile(path[0]);
     //   .resize({ fit: sharp.fit.contain, width: 150 })
-    return path;
+    return { path: path[1] };
   }
 
   async removeImage(path: string) {

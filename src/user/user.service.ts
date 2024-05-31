@@ -47,19 +47,27 @@ export class UserService {
     return { list, total: count };
   }
 
-  async updateAvatar(userId: number, path, storagePath) {
-    try {
-      const user = await this.usersRepository.findOne({
-        where: { id: userId },
-      });
-      if (!user) {
-        throw new NotFoundException();
-      }
-      console.log('path', path, storagePath);
-      await this.usersRepository.update(userId, { avatar: path });
-      const result = await this.imageService.removeImage(user.avatar);
-      // console.log('result ____', result);
-    } catch (err) {}
+  async updateAvatar(userId: number, files) {
+    if (files.avatar) {
+      const avatar = await this.imageService.uploadImage(
+        files.avatar[0],
+        'avatars',
+        100,
+      );
+
+      try {
+        const user = await this.usersRepository.findOne({
+          where: { id: userId },
+        });
+        if (!user) {
+          throw new NotFoundException();
+        }
+        console.log('path', avatar);
+        await this.usersRepository.update(userId, { avatar: avatar.path });
+        const result = await this.imageService.removeImage(user.avatar);
+        // console.log('result ____', result);
+      } catch (err) {}
+    }
   }
 
   async getAvatar(userId: number) {
@@ -67,5 +75,18 @@ export class UserService {
       where: { id: userId },
       select: ['avatar'],
     });
+  }
+
+  async getMyProfile(userId: number) {
+    const row = await this.usersRepository.findOne({
+      where: { id: userId },
+      select: { firstName: true, lastName: true, avatar: true },
+    });
+
+    return { user: row };
+  }
+
+  async updateProfile(userId, dto, files) {
+    return await this.updateAvatar(userId, files);
   }
 }
