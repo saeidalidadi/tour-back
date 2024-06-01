@@ -3,6 +3,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -11,6 +13,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { ImageEntity } from './images.entity';
+import { TagEntity } from './tags.entity';
 
 export enum TourStatus {
   RELEASED = 'released',
@@ -67,6 +70,10 @@ export class Tour {
   @ManyToOne(() => User, (user) => user.tours)
   @JoinColumn({ name: 'owner_id' })
   owner?: User;
+
+  @ManyToMany(() => TagEntity)
+  @JoinTable({ name: 'tours_tags' })
+  tags: TagEntity[];
 
   @VirtualColumn({
     query: (alias) => `substring(tour.tourDescription for 250)`,

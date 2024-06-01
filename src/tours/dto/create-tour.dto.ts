@@ -26,7 +26,7 @@ export class CreateTourDto {
   tourAttendance: number;
 
   @IsArray()
-  tags: Array<string>;
+  tags: Array<number>;
 
   @IsArray()
   images: Array<string>;

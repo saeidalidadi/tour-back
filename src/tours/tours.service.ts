@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, FindOneOptions, QueryRunner, Repository } from 'typeorm';
 import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
-import { Leader, User } from '../entities';
+import { Leader, TagEntity, User } from '../entities';
 import { TourStatus } from './enums';
 import { ImagesService } from '../images/images.service';
 import { UpdateTourDto } from './dto/update-tour.dto';
@@ -37,6 +37,11 @@ export class ToursService {
     tourEntity.tourAttendance = tour.tourAttendance;
     tourEntity.owner = { id: leaderId } as User;
     tourEntity.timeline = tour.timeline;
+
+    const tags = tour.tags.map((tag) => {
+      return { id: tag } as TagEntity;
+    });
+    tourEntity.tags = tags;
 
     try {
       const result = await queryRunner.manager.save(tourEntity);
