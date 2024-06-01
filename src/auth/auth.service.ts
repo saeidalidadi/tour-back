@@ -49,6 +49,7 @@ export class AuthService {
         roles: user.roles.split(','),
         lastName: user.lastName,
         avatar: user.avatar,
+        id: user.id,
       },
     };
   }

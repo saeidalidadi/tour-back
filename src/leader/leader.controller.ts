@@ -30,7 +30,7 @@ export class LeaderController {
   @Roles(Role.Admin)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  getMyTours(@Param('id') leaderId: number, @Query('page') page: number) {
+  getLeaderTours(@Param('id') leaderId: number, @Query('page') page: number) {
     return this.leaderService.getLeaderTours(leaderId, page);
   }
 
@@ -64,5 +64,14 @@ export class LeaderController {
   ) {
     console.log('files___', files);
     return this.leaderService.updateProfile(req.user.id, leaderDto, files);
+  }
+
+  @Get('/tours')
+  @Roles(Role.Leader)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  getMyTours(@Request() req: any, @Query('page') page: number) {
+    console.log('tours api log....');
+    return this.leaderService.getLeaderTours(req.user.id, page);
   }
 }

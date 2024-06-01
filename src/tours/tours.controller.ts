@@ -99,15 +99,6 @@ export class ToursController {
     return this.tourService.rejectTour(tourId, rejectionData);
   }
 
-  @Get('/me')
-  @Roles(Role.Leader)
-  @UseGuards(RolesGuard)
-  @UseGuards(JwtAuthGuard)
-  getMyTours(@Request() req: any, @Query('page') page: number) {
-    console.log('tours api log....');
-    return this.tourService.getLeaderTours(req.user.id, page);
-  }
-
   @Get()
   @Roles(Role.Admin)
   @UseGuards(RolesGuard)
