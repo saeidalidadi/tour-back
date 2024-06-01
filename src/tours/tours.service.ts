@@ -169,6 +169,7 @@ export class ToursService {
         'owner.id',
         'owner.avatar',
       ])
+      .leftJoinAndSelect('tour.tags', 'tags')
       .getManyAndCount();
 
     return { list: tours, total: count };
@@ -202,7 +203,12 @@ export class ToursService {
   }
 
   async rejectTour(tourId: number, data) {
-    console.log('data', data);
+    console.log('data', tourId, data);
+    await this.tourRepository.update(tourId, {
+      rejectionComment: data.rejectionComment,
+      status: TourStatus.REJECTED,
+    });
+    return { data: true, success: true };
   }
 
   async getLeaderTours(leaderId: number, page: number) {

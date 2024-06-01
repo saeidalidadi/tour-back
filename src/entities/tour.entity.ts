@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -79,4 +80,7 @@ export class Tour {
     query: (alias) => `substring(tour.tourDescription for 250)`,
   })
   subDescription: string;
+
+  @Column({ name: 'rejection_comment', nullable: true })
+  rejectionComment: string;
 }
