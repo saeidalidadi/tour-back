@@ -35,7 +35,19 @@ export class LeaderService {
     return row;
   }
 
-  async updateProfile(userId: number, data: UpdateLeaderDto, files) {
+  async updateProfile(
+    userId: number,
+    data: UpdateLeaderDto,
+    files: { avatar?: Express.Multer.File },
+  ) {
+    console.log('profile dto daa____', data);
     await this.userService.updateAvatar(userId, files);
+    const updateLeaderResult = await this.leaderRepository.update(
+      {
+        user: { id: userId } as User,
+      },
+      { intro: data.leader.intro },
+    );
+    return updateLeaderResult;
   }
 }

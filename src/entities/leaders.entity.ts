@@ -32,4 +32,7 @@ export class Leader {
   @OneToOne(() => User)
   @JoinColumn()
   user: User;
+
+  @Column({ type: 'text', nullable: true })
+  intro: string;
 }
