@@ -15,6 +15,7 @@ import {
 import { User } from './user.entity';
 import { ImageEntity } from './images.entity';
 import { TagEntity } from './tags.entity';
+import { Leader } from './leaders.entity';
 
 export enum TourStatus {
   RELEASED = 'released',
@@ -83,4 +84,8 @@ export class Tour {
 
   @Column({ name: 'rejection_comment', nullable: true })
   rejectionComment: string;
+
+  @ManyToOne(() => Leader, (leader) => leader.tours)
+  @JoinColumn({ name: 'leader_id' })
+  leader: Leader;
 }

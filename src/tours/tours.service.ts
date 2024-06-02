@@ -189,7 +189,11 @@ export class ToursService {
   async getTour(id: number) {
     const row = await this.tourRepository.findOne({
       where: { id },
-      relations: { images: true },
+      relations: { images: true, leader: true, owner: true },
+      select: {
+        leader: { intro: true },
+        owner: { firstName: true, lastName: true, avatar: true },
+      },
     });
 
     return row;

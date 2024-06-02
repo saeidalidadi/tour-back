@@ -3,11 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Tour } from './tour.entity';
 
 @Entity('leaders')
 export class Leader {
@@ -32,6 +34,9 @@ export class Leader {
   @OneToOne(() => User)
   @JoinColumn()
   user: User;
+
+  @OneToMany(() => Tour, (tour) => tour.leader)
+  tours?: Tour[];
 
   @Column({ type: 'text', nullable: true })
   intro: string;

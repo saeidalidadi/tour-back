@@ -65,14 +65,6 @@ export class ToursController {
     // return this.tourService.removeImage(imageUUID, req.user.id);
   }
 
-  // @Delete(':id/images/:uuid')
-  // @Roles(Role.Leader)
-  // @UseGuards(RolesGuard)
-  // @UseGuards(JwtAuthGuard)
-  // deleteImageOfTour(@Param('uuid') imageUUID: string, @Request() req: any) {
-  //   return this.tourService.removeToursImage(imageUUID, req.user.id);
-  // }
-
   @Get('/public')
   async tourListPublic(@Query('page') page: number) {
     return await this.tourService.listPublic(page);
