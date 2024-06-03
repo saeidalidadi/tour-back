@@ -70,8 +70,8 @@ export class LeaderController {
   @Roles(Role.Leader)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  getMyTours(@Request() req: any, @Query('page') page: number) {
+  getMyTours(@Request() req: any, @Query() query: number) {
     console.log('tours api log....');
-    return this.leaderService.getLeaderTours(req.user.id, page);
+    return this.leaderService.getLeaderTours(req.user.id, query);
   }
 }

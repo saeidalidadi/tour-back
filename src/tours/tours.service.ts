@@ -1,7 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, FindOneOptions, QueryRunner, Repository } from 'typeorm';
+import {
+  DataSource,
+  Equal,
+  FindManyOptions,
+  FindOneOptions,
+  In,
+  QueryRunner,
+  Repository,
+} from 'typeorm';
 import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
 import { Leader, TagEntity, User } from '../entities';
@@ -225,15 +233,24 @@ export class ToursService {
     return { data: true, success: true };
   }
 
-  async getLeaderTours(leaderId: number, page: number) {
-    const skip = (Number(page) - 1) * 10;
+  async getLeaderTours(leaderId: number, queries: any) {
+    const { status } = queries;
+    const skip = (Number(queries.page) - 1) * 10;
     const owner = new User();
     owner.id = leaderId;
-    const [tours, count] = await this.tourRepository.findAndCount({
+    const queryOptions: FindManyOptions<Tour> = {
       where: { owner },
       skip,
       take: 10,
-    });
+      order: { updatedAt: 'DESC' },
+    };
+    if (status) {
+      queryOptions.where = {
+        ...queryOptions.where,
+        status: typeof status === 'string' ? Equal(status) : In(status),
+      };
+    }
+    const [tours, count] = await this.tourRepository.findAndCount(queryOptions);
     return { list: tours, total: count };
   }
 

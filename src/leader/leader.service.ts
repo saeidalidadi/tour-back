@@ -17,8 +17,8 @@ export class LeaderService {
     private readonly userService: UserService,
     private readonly imageService: ImagesService,
   ) {}
-  async getLeaderTours(leaderId: number, page: number) {
-    return await this.tourService.getLeaderTours(leaderId, page);
+  async getLeaderTours(leaderId: number, queries: any) {
+    return await this.tourService.getLeaderTours(leaderId, queries);
   }
 
   async list() {
