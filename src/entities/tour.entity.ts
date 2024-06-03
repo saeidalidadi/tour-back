@@ -60,6 +60,18 @@ export class Tour {
   @Column({ name: 'tour_attendance', default: 1, type: 'int4' })
   tourAttendance: number;
 
+  @Column({ name: 'origin_province' })
+  originProvince: string;
+
+  @Column({ name: 'origin_city' })
+  originCity: string;
+
+  @Column({ name: 'destination_province' })
+  destinationProvince: string;
+
+  @Column({ name: 'destination_city' })
+  destinationCity: string;
+
   @Column({ enum: TourStatus, default: TourStatus.RELEASED })
   status: TourStatus;
 

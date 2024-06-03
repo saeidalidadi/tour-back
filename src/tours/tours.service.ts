@@ -22,21 +22,29 @@ export class ToursService {
   async createTour(
     images: Array<Express.Multer.File>,
     tour: CreateTourDto,
-    leaderId: number,
+    userId: number,
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
+    const user = { id: userId } as User;
+    const leader = await queryRunner.manager.findOne(Leader, {
+      where: { user: user },
+    });
     const tourEntity = this.tourRepository.create();
+    tourEntity.leader = leader;
     tourEntity.tourName = tour.tourName;
     tourEntity.tourDescription = tour.tourDescription;
     tourEntity.startDate = new Date(Number(tour.duration.from));
     tourEntity.finishDate = new Date(Number(tour.duration.to));
     tourEntity.price = tour.price;
     tourEntity.tourAttendance = tour.tourAttendance;
-    tourEntity.owner = { id: leaderId } as User;
+    tourEntity.owner = user;
     tourEntity.timeline = tour.timeline;
+    tourEntity.originProvince = tour.origin.province;
+    tourEntity.originCity = tour.origin.city;
+    tourEntity.destinationProvince = tour.destination.province;
+    tourEntity.destinationCity = tour.destination.city;
 
     const tags = tour.tags.map((tag) => {
       return { id: tag } as TagEntity;
@@ -186,13 +194,15 @@ export class ToursService {
     return { list: tours, total: count };
   }
 
+  // Public
   async getTour(id: number) {
     const row = await this.tourRepository.findOne({
       where: { id },
-      relations: { images: true, leader: true, owner: true },
+      relations: { images: true, leader: true, owner: true, tags: true },
       select: {
         leader: { intro: true },
         owner: { firstName: true, lastName: true, avatar: true },
+        tags: { name: true, id: true },
       },
     });
 

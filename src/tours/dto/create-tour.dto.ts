@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNumber,
+  IsObject,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 export class TourDateRangeDto {
   @IsString()
@@ -7,6 +13,14 @@ export class TourDateRangeDto {
 
   @IsString()
   to: string;
+}
+
+export class ProvinceCityDto {
+  @IsString()
+  province: string;
+
+  @IsString()
+  city: string;
 }
 
 export class CreateTourDto {
@@ -33,4 +47,14 @@ export class CreateTourDto {
 
   @IsArray()
   timeline: any;
+
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ProvinceCityDto)
+  origin: ProvinceCityDto;
+
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ProvinceCityDto)
+  destination: ProvinceCityDto;
 }
