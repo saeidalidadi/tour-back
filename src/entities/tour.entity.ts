@@ -24,6 +24,7 @@ export enum TourStatus {
   PUBLISHED = 'published',
   UNPUBLISHED = 'unpublished',
 }
+
 export type TimelineItem = {
   planDescription: string;
   duration: {
@@ -36,10 +37,10 @@ export class Tour {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   @Column({ name: 'tour_name' })
@@ -93,6 +94,11 @@ export class Tour {
     query: (alias) => `substring(tour.tourDescription for 250)`,
   })
   subDescription: string;
+
+  @VirtualColumn({
+    query: (alias) => `DATE_PART('day', tour.finishDate - tour.startDate)`,
+  })
+  days: number;
 
   @Column({ name: 'rejection_comment', nullable: true })
   rejectionComment: string;

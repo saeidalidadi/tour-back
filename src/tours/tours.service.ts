@@ -16,6 +16,7 @@ import { Leader, TagEntity, User } from '../entities';
 import { TourStatus } from './enums';
 import { ImagesService } from '../images/images.service';
 import { UpdateTourDto } from './dto/update-tour.dto';
+import { tourStatus } from '../drizzle/schema';
 
 @Injectable()
 export class ToursService {
@@ -86,9 +87,6 @@ export class ToursService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    // const tourRow = await this.getLeaderTourById(userId, tourId, {
-    //   populate: 'images',
-    // });
     const tourRow = await queryRunner.manager.findOne(Tour, {
       where: { id: tourId, owner: { id: userId } as User },
     });
@@ -160,12 +158,13 @@ export class ToursService {
     return this.imageRepository.create(imagesData);
   }
 
-  async listPublic(page: number = 1) {
-    const skip = (page - 1) * 5;
-    const [tours, count] = await this.tourRepository
+  async listPublic(queries: any) {
+    const skip = ((queries.page ? queries.page : 1) - 1) * 5;
+    const { from, to, days } = queries;
+
+    const query = this.tourRepository
       .createQueryBuilder('tour')
       .leftJoinAndSelect('tour.owner', 'owner')
-      .where('tour.status = :status', { status: TourStatus.PUBLISHED })
       .skip(skip)
       .take(5)
       .orderBy('tour.updatedAt', 'DESC')
@@ -185,8 +184,28 @@ export class ToursService {
         'owner.id',
         'owner.avatar',
       ])
-      .leftJoinAndSelect('tour.tags', 'tags')
-      .getManyAndCount();
+      .where('tour.status = :status', { status: TourStatus.PUBLISHED })
+      .leftJoinAndSelect('tour.tags', 'tags');
+    if (days) {
+      query.andWhere(
+        "DATE_PART( 'day', tour.finishDate - tour.startDate ) = :days",
+        {
+          days,
+        },
+      );
+    }
+    if (from) {
+      query.andWhere('tour.startDate >= :from', {
+        from: new Date(Number(from || Date.now())),
+      });
+    }
+    if (to) {
+      query.andWhere('tour.finishDate <= :to', {
+        to: new Date(Number(to || Date.now())),
+      });
+    }
+
+    const [tours, count] = await query.getManyAndCount();
 
     return { list: tours, total: count };
   }

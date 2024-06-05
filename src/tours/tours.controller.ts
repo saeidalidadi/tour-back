@@ -66,8 +66,10 @@ export class ToursController {
   }
 
   @Get('/public')
-  async tourListPublic(@Query('page') page: number) {
-    return await this.tourService.listPublic(page);
+  async tourListPublic(@Query() query: any, @Request() req: any) {
+    console.log('request', req.url);
+    console.log('queries', query);
+    return await this.tourService.listPublic(query);
   }
 
   @Get(':id')
