@@ -16,7 +16,6 @@ import { Leader, TagEntity, User } from '../entities';
 import { TourStatus } from './enums';
 import { ImagesService } from '../images/images.service';
 import { UpdateTourDto } from './dto/update-tour.dto';
-import { tourStatus } from '../drizzle/schema';
 
 @Injectable()
 export class ToursService {
@@ -89,6 +88,7 @@ export class ToursService {
 
     const tourRow = await queryRunner.manager.findOne(Tour, {
       where: { id: tourId, owner: { id: userId } as User },
+      relations: { tags: true },
     });
     if (!tourRow) {
       throw new NotFoundException();
@@ -100,6 +100,16 @@ export class ToursService {
     tourRow.price = updateTourDto.price;
     tourRow.tourAttendance = updateTourDto.tourAttendance;
     tourRow.timeline = updateTourDto.timeline;
+    tourRow.originProvince = updateTourDto.origin.province;
+    tourRow.originCity = updateTourDto.origin.city;
+    tourRow.destinationProvince = updateTourDto.destination.province;
+    tourRow.destinationCity = updateTourDto.destination.city;
+    console.log('tags of tour', updateTourDto.tags);
+
+    const tags = updateTourDto.tags.map((tag) => {
+      return { id: Number(tag) } as TagEntity;
+    });
+    tourRow.tags = tags;
 
     try {
       const result = await queryRunner.manager.save(tourRow);
@@ -109,14 +119,12 @@ export class ToursService {
       const imageRows = await this.saveTourImages(result.id, images);
       console.log('images of tours', imageRows);
       const imageQueryResult = await queryRunner.manager.save(imageRows);
-      const deletions = [];
-      console.log('delete image before check for images', updateTourDto.images);
+
       if (updateTourDto.images) {
         for (const image of updateTourDto.images) {
           console.log('delete image before check', image);
           if (Number(image.deleted) === 1) {
             console.log('delete image', image);
-            // deletions.push(this.deleteTourImage(image.id, tourId, queryRunner));
             await this.deleteTourImage(image.id, tourId, queryRunner);
           }
         }
@@ -124,6 +132,7 @@ export class ToursService {
       // await Promise.all(deletions);
       await queryRunner.commitTransaction();
     } catch (err) {
+      console.log('erro on update', err);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -186,6 +195,7 @@ export class ToursService {
       ])
       .where('tour.status = :status', { status: TourStatus.PUBLISHED })
       .leftJoinAndSelect('tour.tags', 'tags');
+
     if (days) {
       query.andWhere(
         "DATE_PART( 'day', tour.finishDate - tour.startDate ) = :days",
@@ -284,9 +294,10 @@ export class ToursService {
     user.id = userId;
     const queryObject: FindOneOptions<Tour> = {
       where: { id: tourId, owner: user },
+      relations: { tags: true },
     };
     if (query.populate === 'images') {
-      queryObject.relations = { images: true };
+      queryObject.relations = { ...queryObject.relations, images: true };
     }
 
     return await this.tourRepository.findOne(queryObject);
