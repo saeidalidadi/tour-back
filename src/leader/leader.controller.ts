@@ -74,4 +74,9 @@ export class LeaderController {
     console.log('tours api log....');
     return this.leaderService.getLeaderTours(req.user.id, query);
   }
+
+  @Get(':id/profile')
+  getLeaderProfile(@Param('id') id: number) {
+    return this.leaderService.getLeadersProfile(id);
+  }
 }

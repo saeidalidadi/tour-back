@@ -50,4 +50,18 @@ export class LeaderService {
     );
     return updateLeaderResult;
   }
+
+  async getLeadersProfile(leaderId: number) {
+    const leader = await this.leaderRepository.findOne({
+      where: { id: leaderId },
+      relations: { user: true },
+      select: {
+        intro: true,
+        id: true,
+        user: { firstName: true, lastName: true },
+      },
+    });
+    console.log('user and leader data', leader);
+    return leader;
+  }
 }
