@@ -5,7 +5,7 @@ import { ToursModule } from '../tours/tours.module';
 import { LeaderService } from './leader.service';
 import { UserModule } from '../user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Leader } from '../entities';
+import { Leader, LeadersRate } from '../entities';
 import { ImagesModule } from '../images/images.module';
 
 @Module({
@@ -13,7 +13,7 @@ import { ImagesModule } from '../images/images.module';
     AuthModule,
     ToursModule,
     UserModule,
-    TypeOrmModule.forFeature([Leader]),
+    TypeOrmModule.forFeature([Leader, LeadersRate]),
     ImagesModule,
   ],
   controllers: [LeaderController],

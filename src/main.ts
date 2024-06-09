@@ -6,6 +6,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { join } from 'path';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -14,6 +15,7 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('api');
+  app.useGlobalPipes(new ValidationPipe());
   app.enableCors({ origin: '*' });
   app.useStaticAssets({
     root: join(__dirname, '../public'),

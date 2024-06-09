@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Tour } from './tour.entity';
+import { LeadersRate } from './leader-rates';
 
 @Entity('leaders')
 export class Leader {
@@ -40,4 +41,7 @@ export class Leader {
 
   @Column({ type: 'text', nullable: true })
   intro: string;
+
+  @OneToMany(() => LeadersRate, (leaderRates) => leaderRates.rate)
+  rates?: LeadersRate[];
 }

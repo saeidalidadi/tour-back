@@ -8,8 +8,8 @@ import {
   Put,
   Body,
   UseInterceptors,
-  UploadedFile,
   UploadedFiles,
+  Post,
 } from '@nestjs/common';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../auth/enums/roles.enum';
@@ -17,10 +17,8 @@ import { RolesGuard } from '../auth/roles.guard';
 import { JwtAuthGuard } from '../auth/auth.guard';
 import { LeaderService } from './leader.service';
 import { UpdateLeaderDto } from './dto/update-leader.dto';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nest-lab/fastify-multer';
+import { FileFieldsInterceptor } from '@nest-lab/fastify-multer';
+import { CreateLeadersRateDto } from './dto/create-leaders-rate.dto';
 
 @Controller('leaders')
 export class LeaderController {
@@ -78,5 +76,15 @@ export class LeaderController {
   @Get(':id/profile')
   getLeaderProfile(@Param('id') id: number) {
     return this.leaderService.getLeadersProfile(id);
+  }
+
+  @Post(':id/rate')
+  @UseGuards(JwtAuthGuard)
+  rateLeader(
+    @Body() body: CreateLeadersRateDto,
+    @Param('id') leaderId: number,
+    @Request() req: any,
+  ) {
+    return this.leaderService.rate(leaderId, req.user.id, body);
   }
 }

@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { Tour } from './tour.entity';
+import { LeadersRate } from './leader-rates';
 
 @Entity('users')
 export class User {
@@ -42,4 +43,7 @@ export class User {
 
   @OneToMany(() => Tour, (tour) => tour.owner, { cascade: true })
   tours?: Tour[];
+
+  @OneToMany(() => LeadersRate, (leaderRates) => leaderRates.rate)
+  rates?: LeadersRate[];
 }

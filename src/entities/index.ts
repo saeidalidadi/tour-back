@@ -4,6 +4,7 @@ import { User } from './user.entity';
 import { ImageEntity } from './images.entity';
 import { Leader } from './leaders.entity';
 import { TagEntity } from './tags.entity';
-export { Tour, ImageEntity, User, Leader, TagEntity };
+import { LeadersRate } from './leader-rates';
+export { Tour, ImageEntity, User, Leader, TagEntity, LeadersRate };
 
-export default [User, Tour, ImageEntity, Leader, TagEntity];
+export default [User, Tour, ImageEntity, Leader, TagEntity, LeadersRate];
