@@ -169,14 +169,18 @@ export class ToursService {
 
   async listPublic(queries: any) {
     const skip = ((queries.page ? queries.page : 1) - 1) * 5;
-    const { from, to, days } = queries;
+    let { from } = queries;
+    const { to, days } = queries;
+
+    from = from || new Date();
 
     const query = this.tourRepository
       .createQueryBuilder('tour')
       .leftJoinAndSelect('tour.owner', 'owner')
+      .leftJoinAndSelect('tour.leader', 'leader')
       .skip(skip)
       .take(5)
-      .orderBy('tour.updatedAt', 'DESC')
+      .orderBy('tour.updatedAt', 'ASC')
       .select([
         'tour.id',
         'tour.tourName',
@@ -193,6 +197,7 @@ export class ToursService {
         'owner.id',
         'owner.avatar',
       ])
+      .addSelect(['leader.id'])
       .where('tour.status = :status', { status: TourStatus.PUBLISHED })
       .leftJoinAndSelect('tour.tags', 'tags');
 
@@ -234,7 +239,7 @@ export class ToursService {
   // Public
   async getTour(id: number) {
     const row = await this.tourRepository.findOne({
-      where: { id },
+      where: { id, status: Equal(TourStatus.PUBLISHED) },
       relations: { images: true, leader: true, owner: true, tags: true },
       select: {
         leader: { intro: true },
@@ -242,8 +247,8 @@ export class ToursService {
         tags: { name: true, id: true },
       },
     });
-
-    return row;
+    console.log('row of tour_____', row);
+    return { data: row, success: true };
   }
 
   async accept(tourId: number) {
