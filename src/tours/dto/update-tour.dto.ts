@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsNumber,
+  IsNumberString,
   IsObject,
   IsString,
   ValidateNested,
@@ -26,10 +27,10 @@ export class UpdateTourDto {
   @Type(() => TourDateRangeDto)
   duration: TourDateRangeDto;
 
-  @IsNumber()
+  @IsNumberString()
   price: number;
 
-  @IsNumber()
+  @IsNumberString()
   tourAttendance: number;
 
   @IsArray()
