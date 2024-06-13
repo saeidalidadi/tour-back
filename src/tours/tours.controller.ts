@@ -21,6 +21,7 @@ import { TourStatus } from './enums';
 import { AnyFilesInterceptor } from '@nest-lab/fastify-multer';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
+import { CreateReservationDto } from './dto/create-reservation.dto';
 
 @Controller('tours')
 export class ToursController {
@@ -73,8 +74,8 @@ export class ToursController {
   }
 
   @Get(':id')
-  async getTour(@Param('id') tourId: number) {
-    return await this.tourService.getTour(tourId);
+  async getTour(@Param('id') tourId: number, @Query() query: any) {
+    return await this.tourService.getTour(tourId, query);
   }
 
   @Put(':id/accept')
@@ -133,5 +134,15 @@ export class ToursController {
     @Request() req: any,
   ) {
     return this.tourService.setStatus(tourId, req.user.id, mode);
+  }
+
+  @Post(':id/reserve')
+  @UseGuards(JwtAuthGuard)
+  reserveTour(
+    @Param('id') tourId: number,
+    @Request() req: any,
+    @Body() data: CreateReservationDto,
+  ) {
+    return this.tourService.reserve(tourId, req.user.id, data);
   }
 }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTourDto } from './dto/create-tour.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -12,20 +16,45 @@ import {
 } from 'typeorm';
 import { Tour } from '../entities/tour.entity';
 import { ImageEntity } from '../entities/images.entity';
-import { Leader, TagEntity, User } from '../entities';
+import {
+  Leader,
+  TagEntity,
+  TourAttendeesEntity,
+  TourReservationEntity,
+  User,
+} from '../entities';
 import { TourStatus } from './enums';
 import { ImagesService } from '../images/images.service';
 import { UpdateTourDto } from './dto/update-tour.dto';
+import { CreateReservationDto } from './dto/create-reservation.dto';
 
 @Injectable()
 export class ToursService {
   constructor(
     @InjectRepository(Tour) private readonly tourRepository: Repository<Tour>,
+    @InjectRepository(TourReservationEntity)
+    private readonly reservationRepository: Repository<TourReservationEntity>,
     @InjectRepository(ImageEntity)
     private readonly imageRepository: Repository<ImageEntity>,
     private readonly imageService: ImagesService,
     private dataSource: DataSource,
   ) {}
+
+  private async getReservationCount(tourId: number) {
+    const [reservations, count] = await this.reservationRepository.findAndCount(
+      {
+        where: { tour: { id: tourId } as Tour },
+        relations: { attendees: true },
+      },
+    );
+    return (
+      count +
+      reservations.reduce((total, rsv) => {
+        const cTotal = total + rsv.attendees.length;
+        return cTotal;
+      }, 0)
+    );
+  }
 
   async createTour(
     images: Array<Express.Multer.File>,
@@ -237,7 +266,17 @@ export class ToursService {
   }
 
   // Public
-  async getTour(id: number) {
+  async getTour(id: number, query) {
+    const { populate } = query;
+
+    if (populate == 'reservation') {
+      const row = await this.tourRepository.findOne({
+        where: { id },
+        select: { tourName: true, id: true, tourAttendance: true, price: true },
+      });
+      const reservation = await this.getReservationCount(row.id);
+      return { data: { ...row, reservations: reservation }, success: true };
+    }
     const row = await this.tourRepository.findOne({
       where: { id, status: Equal(TourStatus.PUBLISHED) },
       relations: { images: true, leader: true, owner: true, tags: true },
@@ -334,5 +373,59 @@ export class ToursService {
       .execute();
 
     return result;
+  }
+
+  async reserve(tourId: number, userId: number, data: CreateReservationDto) {
+    console.log('data of reservation____', data);
+
+    const tour = new Tour();
+    tour.id = tourId;
+
+    const tourRow = await this.tourRepository.findOne({
+      where: tour,
+    });
+
+    if (!tourRow) {
+      throw new NotFoundException('تور مورد نظر یافت نشد');
+    }
+    const query = this.dataSource.createQueryRunner();
+    try {
+      await query.connect();
+      await query.startTransaction('REPEATABLE READ');
+      const requestedReservationCount = data.attendees.length + 1;
+      const currentReservationCount = await this.getReservationCount(tour.id);
+
+      if (
+        requestedReservationCount + currentReservationCount >
+        tourRow.tourAttendance
+      ) {
+        throw new NotAcceptableException({
+          message: 'تعداد درخواستی برای رزرو بیشتر از ظرفیت میباشد',
+          availableCount: tourRow.tourAttendance - currentReservationCount,
+        });
+      }
+      const reservation = this.reservationRepository.create();
+      reservation.tour = tour;
+      reservation.user = { id: userId } as User;
+      reservation.attendees = data.attendees.map((it) => {
+        const atn = new TourAttendeesEntity();
+        atn.fullName = it.fullName;
+        atn.gender = it.gender;
+        atn.mobile = it.mobile;
+        atn.nationalId = it.nationalId;
+        return atn;
+      });
+      const result = await query.manager.save(reservation);
+      await query.commitTransaction();
+      console.log('result', result);
+      return { data: result };
+    } catch (err) {
+      await query.rollbackTransaction();
+      if (err.status) {
+        throw err;
+      }
+    } finally {
+      await query.release();
+    }
   }
 }

@@ -8,6 +8,8 @@ import {
 } from 'typeorm';
 import { Tour } from './tour.entity';
 import { LeadersRate } from './leader-rates';
+import { TourReservationEntity } from './tour-reservations.entity';
+import { GenderEnum } from '../enums';
 
 @Entity('users')
 export class User {
@@ -25,6 +27,9 @@ export class User {
 
   @Column({ name: 'last_name', type: 'varchar', nullable: true })
   lastName?: string;
+
+  @Column({ type: 'enum', enum: GenderEnum })
+  gender: GenderEnum;
 
   @Column({ default: true, type: 'varchar', unique: true })
   email?: string;
@@ -46,4 +51,7 @@ export class User {
 
   @OneToMany(() => LeadersRate, (leaderRates) => leaderRates.rate)
   rates?: LeadersRate[];
+
+  @OneToMany(() => TourReservationEntity, (reservation) => reservation.user)
+  reservations?: TourReservationEntity[];
 }

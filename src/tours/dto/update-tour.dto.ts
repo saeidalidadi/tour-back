@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsNumberString,
   IsObject,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -37,6 +38,7 @@ export class UpdateTourDto {
   tags: Array<string>;
 
   @IsArray()
+  @IsOptional()
   images: Array<{ deleted: string; id: number }>;
 
   @IsArray()

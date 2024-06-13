@@ -5,6 +5,26 @@ import { ImageEntity } from './images.entity';
 import { Leader } from './leaders.entity';
 import { TagEntity } from './tags.entity';
 import { LeadersRate } from './leader-rates';
-export { Tour, ImageEntity, User, Leader, TagEntity, LeadersRate };
+import { TourReservationEntity } from './tour-reservations.entity';
+import { TourAttendeesEntity } from './tour-attendees';
+export {
+  Tour,
+  ImageEntity,
+  User,
+  Leader,
+  TagEntity,
+  LeadersRate,
+  TourReservationEntity,
+  TourAttendeesEntity,
+};
 
-export default [User, Tour, ImageEntity, Leader, TagEntity, LeadersRate];
+export default [
+  User,
+  Tour,
+  ImageEntity,
+  Leader,
+  TagEntity,
+  LeadersRate,
+  TourReservationEntity,
+  TourAttendeesEntity,
+];

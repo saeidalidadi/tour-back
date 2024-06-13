@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -16,6 +15,7 @@ import { User } from './user.entity';
 import { ImageEntity } from './images.entity';
 import { TagEntity } from './tags.entity';
 import { Leader } from './leaders.entity';
+import { TourReservationEntity } from './tour-reservations.entity';
 
 export enum TourStatus {
   RELEASED = 'released',
@@ -106,4 +106,7 @@ export class Tour {
   @ManyToOne(() => Leader, (leader) => leader.tours)
   @JoinColumn({ name: 'leader_id' })
   leader: Leader;
+
+  @OneToMany(() => TourReservationEntity, (reservation) => reservation.tour)
+  reservations?: TourReservationEntity[];
 }
