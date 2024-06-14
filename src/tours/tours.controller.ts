@@ -145,4 +145,12 @@ export class ToursController {
   ) {
     return this.tourService.reserve(tourId, req.user.id, data);
   }
+
+  @Get(':id/reservations-gender')
+  @Roles(Role.Leader)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
+  getReservations(@Param('id') tourId: number) {
+    return this.tourService.getReservationsByGender(tourId);
+  }
 }

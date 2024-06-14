@@ -428,4 +428,29 @@ export class ToursService {
       await query.release();
     }
   }
+
+  async getReservationsByGender(tourId: number) {
+    const tour = new Tour();
+    tour.id = tourId;
+    const tourRow = await this.tourRepository.findOne({
+      where: { id: tourId },
+    });
+    const [reservations, count] = await this.reservationRepository.findAndCount(
+      {
+        where: { tour: tour },
+        relations: { attendees: true, user: true },
+        select: { attendees: { gender: true }, user: { gender: true } },
+      },
+    );
+    const byGender = reservations.reduce((tmp, rsv) => {
+      const currentUserGender = rsv.user.gender;
+      const atnsGender = rsv.attendees.map((it) => it.gender);
+      return [...tmp, currentUserGender, ...atnsGender];
+    }, []);
+    return {
+      list: reservations,
+      byGender: byGender,
+      availableCount: tourRow.tourAttendance - byGender.length,
+    };
+  }
 }
