@@ -27,6 +27,7 @@ import { TourStatus } from './enums';
 import { ImagesService } from '../images/images.service';
 import { UpdateTourDto } from './dto/update-tour.dto';
 import { CreateReservationDto } from './dto/create-reservation.dto';
+import { tours } from '../drizzle/schema';
 
 @Injectable()
 export class ToursService {
@@ -146,14 +147,11 @@ export class ToursService {
 
       await queryRunner.startTransaction();
       const imageRows = await this.saveTourImages(result.id, images);
-      console.log('images of tours', imageRows);
       const imageQueryResult = await queryRunner.manager.save(imageRows);
 
       if (updateTourDto.images) {
         for (const image of updateTourDto.images) {
-          console.log('delete image before check', image);
           if (Number(image.deleted) === 1) {
-            console.log('delete image', image);
             await this.deleteTourImage(image.id, tourId, queryRunner);
           }
         }
@@ -161,7 +159,6 @@ export class ToursService {
       // await Promise.all(deletions);
       await queryRunner.commitTransaction();
     } catch (err) {
-      console.log('erro on update', err);
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
@@ -266,28 +263,61 @@ export class ToursService {
   }
 
   // Public
-  async getTour(id: number, query) {
+  async getTour(id: number, query, userId: number | undefined) {
     const { populate } = query;
-
     if (populate == 'reservation') {
       const row = await this.tourRepository.findOne({
         where: { id },
-        select: { tourName: true, id: true, tourAttendance: true, price: true },
+        select: {
+          tourName: true,
+          id: true,
+          tourAttendance: true,
+          price: true,
+          status: true,
+        },
       });
       const reservation = await this.getReservationCount(row.id);
       return { data: { ...row, reservations: reservation }, success: true };
     }
     const row = await this.tourRepository.findOne({
-      where: { id, status: Equal(TourStatus.PUBLISHED) },
+      where: {
+        id,
+        status: In([
+          TourStatus.PUBLISHED,
+          TourStatus.FINISHED,
+          TourStatus.STARTED,
+        ]),
+      },
       relations: { images: true, leader: true, owner: true, tags: true },
       select: {
+        id: true,
+        status: true,
+        tourName: true,
+        tourAttendance: true,
+        timeline: true,
+        startDate: true,
+        finishDate: true,
+        tourDescription: true,
+        price: true,
         leader: { intro: true },
         owner: { firstName: true, lastName: true, avatar: true },
         tags: { name: true, id: true },
+        // status: true,
       },
     });
-    console.log('row of tour_____', row);
-    return { data: row, success: true };
+    let canComment: boolean = false;
+    if (
+      row &&
+      (row.status === TourStatus.FINISHED ||
+        row.status === TourStatus.STARTED) &&
+      userId
+    ) {
+      canComment = await this.reservationRepository.exists({
+        where: { tour: { id: row.id } as Tour, user: { id: userId } as User },
+      });
+    }
+
+    return { data: { ...row, canComment }, success: true };
   }
 
   async accept(tourId: number) {
@@ -452,5 +482,16 @@ export class ToursService {
       byGender: byGender,
       availableCount: tourRow.tourAttendance - byGender.length,
     };
+  }
+
+  async getLeaderProfileTours(leaderId: number) {
+    const tours = await this.tourRepository.find({
+      where: {
+        leader: { id: leaderId } as Leader,
+        status: In([TourStatus.PUBLISHED, TourStatus.STARTED]),
+      },
+      relations: { images: true },
+    });
+    return tours;
   }
 }

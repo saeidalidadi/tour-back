@@ -23,6 +23,9 @@ export enum TourStatus {
   REJECTED = 'rejected',
   PUBLISHED = 'published',
   UNPUBLISHED = 'unpublished',
+  STARTED = 'started',
+  FINISHED = 'finished',
+  CANCELED = 'canceled',
 }
 
 export type TimelineItem = {
@@ -73,7 +76,7 @@ export class Tour {
   @Column({ name: 'destination_city' })
   destinationCity: string;
 
-  @Column({ enum: TourStatus, default: TourStatus.RELEASED })
+  @Column({ type: 'enum', enum: TourStatus, default: TourStatus.RELEASED })
   status: TourStatus;
 
   @Column({ type: 'json', default: '[]' })

@@ -27,9 +27,7 @@ export class ImagesService {
       const uuid = uuid4();
       let path = [];
       const sh = sharp(file.buffer, { failOnError: false });
-      console.log('forma of file', file.mimetype);
       if (file.mimetype == 'image/jpeg') {
-        console.log('format for jpg');
         sh.jpeg({ quality: 100 });
         path = this.imagesPath(uuid, 'jpg', dir);
       }
@@ -67,7 +65,6 @@ export class ImagesService {
   }
 
   async removeImage(path: string) {
-    console.log('remove image from ', path);
     const origin = this.getFilePath(path);
     // const leader = await this.use;
     if (existsSync(origin)) {

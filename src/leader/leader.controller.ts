@@ -87,4 +87,9 @@ export class LeaderController {
   ) {
     return this.leaderService.rate(leaderId, req.user.id, body);
   }
+
+  @Get(':id/profile/tours')
+  publicLeaderTours(@Param('id') id: number) {
+    return this.leaderService.getProfileLeaderTours(id);
+  }
 }

@@ -95,4 +95,15 @@ export class LeaderService {
     const result = await this.leaderRateRepository.save(rate);
     return { data: result, success: true };
   }
+
+  async getProfileLeaderTours(leaderId: number) {
+    const leaderRow = await this.leaderRepository.findOne({
+      where: { id: leaderId },
+    });
+    if (!leaderRow) {
+      throw new NotFoundException('لیدر مورد نظر وجود ندارد');
+    }
+    const tours = await this.tourService.getLeaderProfileTours(leaderId);
+    return tours;
+  }
 }

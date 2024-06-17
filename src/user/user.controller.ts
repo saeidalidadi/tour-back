@@ -39,7 +39,6 @@ export class UserController {
     @Body() leaderDto: any,
     @Request() req: any,
   ) {
-    console.log('files___', files);
     return this.userService.updateProfile(req.user.id, leaderDto, files);
   }
 }
