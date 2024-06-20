@@ -31,13 +31,13 @@ export class User {
   @Column({ type: 'enum', enum: GenderEnum })
   gender: GenderEnum;
 
-  @Column({ default: true, type: 'varchar', unique: true })
+  @Column({ type: 'varchar', unique: true, nullable: true })
   email?: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   password?: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   salt?: string;
 
   @Column({ name: 'roles', nullable: true })
@@ -45,6 +45,9 @@ export class User {
 
   @Column({ name: 'avatar', type: 'character varying', default: '' })
   avatar: string;
+
+  @Column({ type: 'character varying', nullable: true, unique: true })
+  mobile: string;
 
   @OneToMany(() => Tour, (tour) => tour.owner, { cascade: true })
   tours?: Tour[];

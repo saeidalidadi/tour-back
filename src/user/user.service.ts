@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
@@ -14,17 +18,28 @@ export class UserService {
     private readonly imageService: ImagesService,
   ) {}
   async createUser(user: Partial<UserDto>): Promise<User> {
-    console.log(user);
     const userData = this.usersRepository.create();
     userData.firstName = user.firstName;
-    userData.email = user.username;
     userData.lastName = user.lastName;
-    userData.password = user.password;
-    userData.salt = user.salt;
+    if (user.email) {
+      userData.email = user.email;
+    }
+    if (user.mobile) {
+      userData.mobile = user.mobile;
+    }
+    userData.gender = user.gender;
     if (user.userType == 'PROVIDER') {
       userData.roles = 'leader';
     }
-    return await this.usersRepository.save(userData);
+    try {
+      return await this.usersRepository.save(userData);
+    } catch (err) {
+      if (err.code == 23505) {
+        throw new ConflictException(
+          'شما قبلا با این ایمیل یا شماره موبایل ثبت نام کرده اید',
+        );
+      }
+    }
   }
 
   async findOneById(userId: number) {

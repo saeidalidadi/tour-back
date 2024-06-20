@@ -11,20 +11,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   async register(user: RegisterDto) {
-    const { password, username } = user;
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
+    const { email, mobile } = user;
 
-    const userResult = await this.userService.createUser({
-      username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      password: passwordHash,
-      userType: user.userType,
-      salt,
-    });
+    console.log('email or mobile', email, mobile);
 
-    return { id: userResult.id };
+    return await this.userService.createUser(user);
   }
 
   async validateUser(username: string, pass: string): Promise<any> {
