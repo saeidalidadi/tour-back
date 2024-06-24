@@ -10,6 +10,7 @@ import { Tour } from './tour.entity';
 import { LeadersRate } from './leader-rates';
 import { TourReservationEntity } from './tour-reservations.entity';
 import { GenderEnum } from '../enums';
+import { VerificationEntity } from './verification.entity';
 
 @Entity('users')
 export class User {
@@ -57,4 +58,9 @@ export class User {
 
   @OneToMany(() => TourReservationEntity, (reservation) => reservation.user)
   reservations?: TourReservationEntity[];
+
+  @OneToMany(() => VerificationEntity, (verification) => verification.user, {
+    cascade: true,
+  })
+  authentications?: VerificationEntity[];
 }

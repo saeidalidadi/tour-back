@@ -17,6 +17,7 @@ export class UserService {
     private usersRepository: Repository<User>,
     private readonly imageService: ImagesService,
   ) {}
+
   async createUser(user: Partial<UserDto>): Promise<User> {
     const userData = this.usersRepository.create();
     userData.firstName = user.firstName;
@@ -51,6 +52,7 @@ export class UserService {
       email: email,
     })) as Required<User>;
   }
+
   async getProfile(id: number) {
     return await this.usersRepository.findOne({ where: { id: id } });
   }

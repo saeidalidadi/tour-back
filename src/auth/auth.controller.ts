@@ -18,4 +18,9 @@ export class AuthController {
   async login(@Request() req: any) {
     return await this.authService.login(req.user);
   }
+
+  @Post('/verify')
+  verifyMobileOrEmail(@Body() body: any) {
+    return this.authService.verifyMobileOrEmail(body);
+  }
 }

@@ -14,6 +14,8 @@ import { RolesGuard } from './auth/roles.guard';
 import { LeaderModule } from './leader/leader.module';
 import { AppLoggerMiddleware } from './middlewares/logger.middleware';
 import { ImagesModule } from './images/images.module';
+import { Mail } from './mail/mail.service';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -50,6 +52,7 @@ import { ImagesModule } from './images/images.module';
     AuthModule,
     LeaderModule,
     ImagesModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

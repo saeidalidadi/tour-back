@@ -7,6 +7,7 @@ import { TagEntity } from './tags.entity';
 import { LeadersRate } from './leader-rates';
 import { TourReservationEntity } from './tour-reservations.entity';
 import { TourAttendeesEntity } from './tour-attendees';
+import { VerificationEntity } from './verification.entity';
 export {
   Tour,
   ImageEntity,
@@ -16,6 +17,7 @@ export {
   LeadersRate,
   TourReservationEntity,
   TourAttendeesEntity,
+  VerificationEntity,
 };
 
 export default [
@@ -27,4 +29,5 @@ export default [
   LeadersRate,
   TourReservationEntity,
   TourAttendeesEntity,
+  VerificationEntity,
 ];
