@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ToursController } from './tours.controller';
 import { ToursService } from './tours.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,8 +10,8 @@ import { ImagesModule } from '../images/images.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Tour, ImageEntity, TourReservationEntity]),
-    UserModule,
-    AuthModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => AuthModule),
     ImagesModule,
   ],
   controllers: [ToursController],

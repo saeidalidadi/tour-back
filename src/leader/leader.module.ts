@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { LeaderController } from './leader.controller';
 import { AuthModule } from '../auth/auth.module';
 import { ToursModule } from '../tours/tours.module';
@@ -10,13 +10,14 @@ import { ImagesModule } from '../images/images.module';
 
 @Module({
   imports: [
-    AuthModule,
+    forwardRef(() => UserModule),
+    forwardRef(() => AuthModule),
     ToursModule,
-    UserModule,
     TypeOrmModule.forFeature([Leader, LeadersRate]),
     ImagesModule,
   ],
   controllers: [LeaderController],
   providers: [LeaderService],
+  exports: [LeaderService],
 })
 export class LeaderModule {}

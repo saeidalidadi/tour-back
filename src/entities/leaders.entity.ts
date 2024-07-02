@@ -14,7 +14,7 @@ import { LeadersRate } from './leader-rates';
 
 @Entity('leaders')
 export class Leader {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'id' })
   id: number;
 
   @UpdateDateColumn()
@@ -26,14 +26,14 @@ export class Leader {
   @Column({ type: 'boolean', default: false })
   accepted: boolean;
 
-  @Column()
+  @Column({ name: 'mobile', type: 'character varying' })
   mobile: string;
 
   @Column({ type: 'float', default: 0 })
   stars: number;
 
   @OneToOne(() => User)
-  @JoinColumn()
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @OneToMany(() => Tour, (tour) => tour.leader)

@@ -15,10 +15,10 @@ export class VerificationEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
   updatedAt: Date;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 
   @Column({ name: 'verification_code', type: 'character varying' })

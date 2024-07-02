@@ -1,6 +1,5 @@
 import {
   ForbiddenException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,10 +10,11 @@ import { RegisterDto } from './dto/register.dto';
 import { Mail } from '../mail/mail.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { VerificationEntity } from '../entities/verification.entity';
-import { Or, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../entities';
 import { VerificationTypeEnum } from '../enums';
-import { differenceInMinutes, differenceInSeconds } from 'date-fns';
+import { differenceInSeconds } from 'date-fns';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,32 +26,18 @@ export class AuthService {
   ) {}
 
   async register(user: RegisterDto) {
-    const { email, mobile } = user;
+    const { email, mobile, userType } = user;
 
     console.log('email or mobile', email, mobile);
 
     try {
       const result = await this.userService.createUser(user);
       // send sms or email verification code
-      const randomCode = Math.floor(Math.random() * 90000) + 10000;
-      const auth = this.verificationRepository.create();
-      auth.verificationCode = randomCode.toString();
-      auth.user = { id: result.id } as User;
-
-      if (email) {
-        await this.mailService.sendMail({
-          subject: 'Signup Verification',
-          to: email,
-          html: `<h3 style="display:inline">Verification code: </h3><b style="color: #c78a10">${randomCode}</b>`,
-        });
-        auth.verificationType = VerificationTypeEnum.SIGNUP_EMAIL;
-      } else {
-        // send sms to registered mobile
-        console.log('sms code = %s', randomCode);
-        auth.verificationType = VerificationTypeEnum.SIGNUP_MOBILE;
-      }
-      await this.verificationRepository.save(auth);
-      return result;
+      await this.sendOtp(
+        { ...user, userId: result.id },
+        VerificationTypeEnum.SIGNUP_MOBILE,
+      );
+      return { success: true, message: 'کد به ایمیل یا موبایل شما ارسال شد' };
     } catch (err) {
       throw err;
     }
@@ -117,6 +103,55 @@ export class AuthService {
       return this.login(auth.user);
     } else {
       throw new ForbiddenException('خطای اعتبارسنجی');
+    }
+  }
+
+  async sendOtp(data: any, sendOtpType: VerificationTypeEnum) {
+    const { mobile, email, userId } = data;
+    const randomCode = this.createOtpCode();
+    const auth = this.verificationRepository.create();
+    auth.verificationCode = randomCode.toString();
+    if (userId) {
+      auth.user = { id: userId } as User;
+    } else {
+      const user = await this.userService.findByEmailOrMobile(email, mobile);
+      if (!user) {
+        throw new NotFoundException(
+          'کاربری با این ایمیل یا موبایل ثبت نام نکرده است',
+        );
+      }
+      auth.user = user;
+    }
+
+    if (
+      sendOtpType === VerificationTypeEnum.LOGIN_EMAIL ||
+      sendOtpType === VerificationTypeEnum.SIGNUP_EMAIL
+    ) {
+      await this.mailService.sendMail({
+        subject: 'Signup Verification',
+        to: email,
+        html: `<h3 style="display:inline">Verification code: </h3><b style="color: #c78a10">${randomCode}</b>`,
+      });
+      auth.verificationType = sendOtpType;
+    } else {
+      // send sms to registered mobile
+      console.log('sms code = %s', randomCode);
+      auth.verificationType = sendOtpType;
+    }
+    await this.verificationRepository.save(auth);
+    return { success: true, message: 'کد ارسال شد' };
+  }
+
+  private createOtpCode() {
+    return Math.floor(Math.random() * 90000) + 10000;
+  }
+
+  async sendOtpAuth(body: any) {
+    const { mobile, email } = body;
+    if (mobile) {
+      return await this.sendOtp(body, VerificationTypeEnum.LOGIN_MOBILE);
+    } else if (email) {
+      return await this.sendOtp(body, VerificationTypeEnum.LOGIN_EMAIL);
     }
   }
 }

@@ -9,3 +9,8 @@ export enum VerificationTypeEnum {
   LOGIN_EMAIL = 'login_email',
   LOGIN_MOBILE = 'login_mobile',
 }
+
+export enum USER_TYPE {
+  TOUR_PROVIDER = 'tour_provider',
+  TRAVELER = 'traveler',
+}

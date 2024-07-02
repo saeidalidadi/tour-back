@@ -23,4 +23,9 @@ export class AuthController {
   verifyMobileOrEmail(@Body() body: any) {
     return this.authService.verifyMobileOrEmail(body);
   }
+
+  @Post('/send-otp')
+  sendOtp(@Body() body: any) {
+    return this.authService.sendOtpAuth(body);
+  }
 }

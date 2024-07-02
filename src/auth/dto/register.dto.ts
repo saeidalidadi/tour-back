@@ -13,7 +13,7 @@ import {
   MinLength,
   ValidateIf,
 } from 'class-validator';
-import { GenderEnum } from '../../enums';
+import { GenderEnum, USER_TYPE } from '../../enums';
 
 export class RegisterDto {
   @ApiProperty()
@@ -24,13 +24,14 @@ export class RegisterDto {
   @IsAlpha('fa-IR')
   lastName: string;
 
-  @ApiProperty({ description: 'Register with email or mobile as username' })
-  @ValidateIf((o) => !o.mobile)
+  // @ApiProperty({ description: 'Register with email or mobile as username' })
+  // @ValidateIf((o) => !o.mobile)
   @IsEmail()
+  @IsOptional()
   email: string;
 
-  @ApiProperty({ description: 'Register with email or mobile as username' })
-  @ValidateIf((o) => !o.email)
+  // @ApiProperty({ description: 'Register with email or mobile as username' })
+  // @ValidateIf((o) => !o.email)
   @Matches(/^\d+$/)
   @Length(11)
   mobile: string;
@@ -45,7 +46,7 @@ export class RegisterDto {
 
   @IsString()
   @IsOptional()
-  userType!: 'PROVIDER' | 'TRAVELER';
+  userType!: USER_TYPE;
 
   @IsEnum(GenderEnum)
   gender: GenderEnum;

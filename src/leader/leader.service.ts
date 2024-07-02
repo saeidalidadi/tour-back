@@ -1,7 +1,10 @@
 import {
+  BadGatewayException,
+  Inject,
   Injectable,
   NotAcceptableException,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { ToursService } from '../tours/tours.service';
 import { UserService } from '../user/user.service';
@@ -21,11 +24,24 @@ export class LeaderService {
     @InjectRepository(LeadersRate)
     private readonly leaderRateRepository: Repository<LeadersRate>,
     private readonly tourService: ToursService,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     private readonly imageService: ImagesService,
   ) {}
   async getLeaderTours(leaderId: number, queries: any) {
     return await this.tourService.getLeaderTours(leaderId, queries);
+  }
+  async create(userId: number, mobile: string) {
+    try {
+      const leader = this.leaderRepository.create();
+      leader.user = { id: userId } as User;
+      leader.mobile = mobile;
+      console.log('leader service____create leader____', leader);
+      return await this.leaderRepository.save(leader);
+    } catch (err) {
+      console.log('error of', err);
+      throw new BadGatewayException();
+    }
   }
 
   async list() {

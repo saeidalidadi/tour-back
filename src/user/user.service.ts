@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { UserDto } from './user.dto';
 import { Role } from '../auth/enums/roles.enum';
 import { ImagesService } from '../images/images.service';
+import { USER_TYPE } from '../enums';
+import { LeaderService } from '../leader/leader.service';
 
 @Injectable()
 export class UserService {
@@ -16,24 +18,29 @@ export class UserService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private readonly imageService: ImagesService,
+    private readonly leaderService: LeaderService,
   ) {}
 
   async createUser(user: Partial<UserDto>): Promise<User> {
     const userData = this.usersRepository.create();
     userData.firstName = user.firstName;
     userData.lastName = user.lastName;
-    if (user.email) {
-      userData.email = user.email;
-    }
-    if (user.mobile) {
-      userData.mobile = user.mobile;
-    }
+    userData.mobile = user.mobile;
+    userData.email = user.email;
     userData.gender = user.gender;
-    if (user.userType == 'PROVIDER') {
+    console.log('user is___', user);
+    if (user.userType == USER_TYPE.TOUR_PROVIDER) {
       userData.roles = 'leader';
+    } else {
+      userData.roles = 'user';
     }
     try {
-      return await this.usersRepository.save(userData);
+      const userRow = await this.usersRepository.save(userData);
+      console.log('user row is', userRow);
+      if (user.userType == USER_TYPE.TOUR_PROVIDER) {
+        await this.leaderService.create(userRow.id, user.mobile);
+      }
+      return userRow;
     } catch (err) {
       if (err.code == 23505) {
         throw new ConflictException(
@@ -97,7 +104,7 @@ export class UserService {
   async getMyProfile(userId: number) {
     const row = await this.usersRepository.findOne({
       where: { id: userId },
-      select: { firstName: true, lastName: true, avatar: true },
+      select: { firstName: true, lastName: true, avatar: true, mobile: true },
     });
 
     return { user: row };
@@ -105,5 +112,11 @@ export class UserService {
 
   async updateProfile(userId, dto, files) {
     return await this.updateAvatar(userId, files);
+  }
+
+  async findByEmailOrMobile(email: string, mobile: string) {
+    return (await this.usersRepository.findOne({
+      where: [{ email: email }, { mobile: mobile }],
+    })) as Required<User>;
   }
 }
