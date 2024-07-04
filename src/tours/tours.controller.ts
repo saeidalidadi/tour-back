@@ -23,6 +23,7 @@ import { CreateTourDto } from './dto/create-tour.dto';
 import { UpdateTourDto } from './dto/update-tour.dto';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { JWTOptional } from '../auth/jwt-optional.decorator';
+import { IsActive } from '../auth/is-active.guard';
 
 @Controller('tours')
 export class ToursController {
@@ -32,6 +33,7 @@ export class ToursController {
   @UseInterceptors(AnyFilesInterceptor())
   @Roles(Role.Leader, Role.Admin)
   @UseGuards(RolesGuard)
+  @UseGuards(IsActive)
   @UseGuards(JwtAuthGuard)
   async createTour(
     @Body() createTourDto: CreateTourDto,
@@ -47,6 +49,7 @@ export class ToursController {
   @UseInterceptors(AnyFilesInterceptor())
   @Roles(Role.Leader, Role.Admin)
   @UseGuards(RolesGuard)
+  @UseGuards(IsActive)
   @UseGuards(JwtAuthGuard)
   async updateTour(
     @Body() tourDto: UpdateTourDto,
@@ -145,6 +148,7 @@ export class ToursController {
   }
 
   @Post(':id/reserve')
+  @UseGuards(IsActive)
   @UseGuards(JwtAuthGuard)
   reserveTour(
     @Param('id') tourId: number,

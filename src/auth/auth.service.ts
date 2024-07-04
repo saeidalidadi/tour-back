@@ -100,6 +100,9 @@ export class AuthService {
       (data.mobile && data.mobile == auth.user.mobile) ||
       (data.email && data.email == auth.user.email)
     ) {
+      if (!auth.user.mobileVerified) {
+        await this.userService.setVerified(auth.user.id, 'mobile');
+      }
       return this.login(auth.user);
     } else {
       throw new ForbiddenException('خطای اعتبارسنجی');
@@ -153,5 +156,9 @@ export class AuthService {
     } else if (email) {
       return await this.sendOtp(body, VerificationTypeEnum.LOGIN_EMAIL);
     }
+  }
+
+  async isActiveUser(userId: number) {
+    return await this.userService.getActiveStatus(userId);
   }
 }

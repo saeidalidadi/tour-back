@@ -31,6 +31,7 @@ export class UserService {
     console.log('user is___', user);
     if (user.userType == USER_TYPE.TOUR_PROVIDER) {
       userData.roles = 'leader';
+      userData.isActive = false;
     } else {
       userData.roles = 'user';
     }
@@ -118,5 +119,15 @@ export class UserService {
     return (await this.usersRepository.findOne({
       where: [{ email: email }, { mobile: mobile }],
     })) as Required<User>;
+  }
+
+  async setVerified(userId: number, verificationTarget: 'mobile' | 'email') {
+    console.log('update mobile or email verification target____', userId);
+    return await this.usersRepository.update(userId, { mobileVerified: true });
+  }
+
+  async getActiveStatus(userId: number) {
+    return (await this.usersRepository.findOne({ where: { id: userId } }))
+      .isActive;
   }
 }

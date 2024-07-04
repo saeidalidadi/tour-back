@@ -17,10 +17,10 @@ export class User {
   @PrimaryGeneratedColumn()
   id?: number;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
   updatedAt: Date;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 
   @Column({ name: 'first_name', type: 'varchar', nullable: true })
@@ -43,6 +43,12 @@ export class User {
 
   @Column({ name: 'roles', nullable: true })
   roles: string;
+
+  @Column({ name: 'is_active', default: true, type: 'boolean' })
+  isActive: boolean;
+
+  @Column({ name: 'mobile_verified', type: 'boolean', default: false })
+  mobileVerified: boolean;
 
   @Column({ name: 'avatar', type: 'character varying', default: '' })
   avatar: string;
