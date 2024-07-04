@@ -16,17 +16,7 @@ import { ImageEntity } from './images.entity';
 import { TagEntity } from './tags.entity';
 import { Leader } from './leaders.entity';
 import { TourReservationEntity } from './tour-reservations.entity';
-
-export enum TourStatus {
-  RELEASED = 'released',
-  ACCEPTED = 'accepted',
-  REJECTED = 'rejected',
-  PUBLISHED = 'published',
-  UNPUBLISHED = 'unpublished',
-  STARTED = 'started',
-  FINISHED = 'finished',
-  CANCELED = 'canceled',
-}
+import { TourStatus } from '../enums';
 
 export type TimelineItem = {
   planDescription: string;

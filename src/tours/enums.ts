@@ -1,1 +1,1 @@
-export { TourStatus } from '../entities/tour.entity';
+export { TourStatus } from '../enums';

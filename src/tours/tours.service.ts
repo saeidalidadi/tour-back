@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   NotAcceptableException,
   NotFoundException,
@@ -28,6 +29,7 @@ import { ImagesService } from '../images/images.service';
 import { UpdateTourDto } from './dto/update-tour.dto';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { tours } from '../drizzle/schema';
+import { differenceInSeconds } from 'date-fns';
 
 @Injectable()
 export class ToursService {
@@ -341,6 +343,7 @@ export class ToursService {
     const skip = (Number(queries.page) - 1) * 10;
     const owner = new User();
     owner.id = leaderId;
+    console.log('status for search____', status);
     const queryOptions: FindManyOptions<Tour> = {
       where: { owner },
       skip,
@@ -380,27 +383,46 @@ export class ToursService {
   async setStatus(tourId: number, leaderId: number, status: TourStatus) {
     const leader = new Leader();
     leader.id = leaderId;
-    const tour = await this.tourRepository.findOne({
-      where: { id: tourId, owner: leader },
-    });
+    let tour: Tour;
+    let findOptions: FindOneOptions<Tour> = {
+      where: {
+        id: tourId,
+        owner: leader,
+      },
+    };
+    if (status == TourStatus.PUBLISHED) {
+      findOptions.where = {
+        ...findOptions.where,
+        status: In([TourStatus.ACCEPTED, TourStatus.UNPUBLISHED]),
+      };
+    } else if (status == TourStatus.STARTED) {
+      findOptions.where = {
+        ...findOptions.where,
+        status: In([TourStatus.PUBLISHED]),
+      };
+    }
+    tour = await this.tourRepository.findOne(findOptions);
+
     if (!tour) {
       throw new NotFoundException('tour not found');
     }
-    const result = await this.dataSource
-      .createQueryBuilder()
-      .update(Tour)
-      .set({
-        status:
-          status === TourStatus.PUBLISHED
-            ? TourStatus.PUBLISHED
-            : TourStatus.UNPUBLISHED,
-      })
-      .where('id = :tourId', { tourId })
-      .andWhere('owner_id = :ownerId', { ownerId: leaderId })
-      .andWhere('status NOT IN (:status)', {
-        status: [TourStatus.REJECTED, TourStatus.RELEASED],
-      })
-      .execute();
+    console.log('tour is____', tour, status);
+    if (
+      status == TourStatus.STARTED &&
+      differenceInSeconds(new Date(), tour.startDate) < 0
+    ) {
+      throw new ForbiddenException(
+        'نمیتوانید قبل از رسیدن زمان شروع اقدام به شروع تور کنید',
+      );
+    }
+
+    if (status == TourStatus.ACCEPTED) {
+      throw new ForbiddenException('شما مجاز به تغییر این وضعیت نمیباشید');
+    }
+
+    const result = await this.tourRepository.update(tour.id, {
+      status: status,
+    });
 
     return result;
   }

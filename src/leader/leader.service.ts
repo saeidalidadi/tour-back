@@ -28,9 +28,11 @@ export class LeaderService {
     private readonly userService: UserService,
     private readonly imageService: ImagesService,
   ) {}
+
   async getLeaderTours(leaderId: number, queries: any) {
     return await this.tourService.getLeaderTours(leaderId, queries);
   }
+
   async create(userId: number, mobile: string) {
     try {
       const leader = this.leaderRepository.create();

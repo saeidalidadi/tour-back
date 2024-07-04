@@ -14,3 +14,14 @@ export enum USER_TYPE {
   TOUR_PROVIDER = 'tour_provider',
   TRAVELER = 'traveler',
 }
+
+export enum TourStatus {
+  RELEASED = 'released',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected',
+  PUBLISHED = 'published',
+  UNPUBLISHED = 'unpublished',
+  STARTED = 'started',
+  FINISHED = 'finished',
+  CANCELED = 'canceled',
+}

@@ -8,7 +8,7 @@ import {
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { TourStatus } from '../entities/tour.entity';
+import { TourStatus } from '../enums';
 
 export const tourStatus = Object.entries(TourStatus).map((it) => it[1]) as any;
 
