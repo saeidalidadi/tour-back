@@ -73,6 +73,7 @@ export class Tour {
   timeline: TimelineItem[];
 
   @OneToMany(() => ImageEntity, (photo) => photo.tour, { cascade: true })
+  @JoinColumn({ name: 'images' })
   images?: ImageEntity[];
 
   @ManyToOne(() => User, (user) => user.tours)

@@ -11,6 +11,7 @@ import {
   Equal,
   FindManyOptions,
   FindOneOptions,
+  FindOptions,
   In,
   QueryRunner,
   Repository,
@@ -122,9 +123,21 @@ export class ToursService {
       where: { id: tourId, owner: { id: userId } as User },
       relations: { tags: true },
     });
+
     if (!tourRow) {
       throw new NotFoundException();
     }
+
+    const reservation = await this.reservationRepository.findOne({
+      where: { tour: { id: tourRow.id } },
+    });
+
+    if (reservation) {
+      throw new ForbiddenException(
+        'قادر به ویرایش این تور نیستید. این تور رزروی دارد',
+      );
+    }
+
     tourRow.tourName = updateTourDto.tourName;
     tourRow.tourDescription = updateTourDto.tourDescription;
     tourRow.startDate = new Date(Number(updateTourDto.duration.from));
@@ -136,7 +149,7 @@ export class ToursService {
     tourRow.originCity = updateTourDto.origin.city;
     tourRow.destinationProvince = updateTourDto.destination.province;
     tourRow.destinationCity = updateTourDto.destination.city;
-    console.log('tags of tour', updateTourDto.tags);
+    tourRow.status = TourStatus.RELEASED;
 
     const tags = updateTourDto.tags.map((tag) => {
       return { id: Number(tag) } as TagEntity;
@@ -227,7 +240,8 @@ export class ToursService {
       ])
       .addSelect(['leader.id'])
       .where('tour.status = :status', { status: TourStatus.PUBLISHED })
-      .leftJoinAndSelect('tour.tags', 'tags');
+      .leftJoinAndSelect('tour.tags', 'tags')
+      .innerJoinAndSelect('tour.images', 'image');
 
     if (days) {
       query.andWhere(
@@ -253,14 +267,22 @@ export class ToursService {
     return { list: tours, total: count };
   }
 
-  async list(page: number) {
-    const skip = (Number(page) - 1) * 10;
-    const [tours, count] = await this.tourRepository.findAndCount({
+  async list(query: any) {
+    const { status } = query;
+    const skip = (Number(query.page) - 1) * 10;
+    const queryOptions: FindManyOptions<Tour> = {
       order: { updatedAt: 'DESC' },
       skip,
       take: 10,
       relations: { owner: true },
-    });
+    };
+    if (status) {
+      queryOptions.where = {
+        ...queryOptions.where,
+        status: typeof status === 'string' ? Equal(status) : In(status),
+      };
+    }
+    const [tours, count] = await this.tourRepository.findAndCount(queryOptions);
     return { list: tours, total: count };
   }
 

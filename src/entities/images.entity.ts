@@ -15,7 +15,7 @@ export class ImageEntity {
   @Column({ name: 'path' })
   path: string;
 
-  @ManyToOne(() => Tour, (user) => user.images)
+  @ManyToOne(() => Tour, (tour) => tour.images)
   @JoinColumn({ name: 'tour_id' })
   tour?: Tour;
 }

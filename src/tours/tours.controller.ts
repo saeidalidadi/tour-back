@@ -109,8 +109,8 @@ export class ToursController {
   @Roles(Role.Admin)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  async tourList(@Query('page') page: number) {
-    return await this.tourService.list(page);
+  async tourList(@Query() query: any) {
+    return await this.tourService.list(query);
   }
 
   @Get(':id/images')
