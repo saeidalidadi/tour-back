@@ -11,6 +11,8 @@ import {
   Put,
   Query,
   UploadedFiles,
+  ParseFilePipe,
+  ParseFilePipeBuilder,
 } from '@nestjs/common';
 import { ToursService } from './tours.service';
 import { JwtAuthGuard } from '../auth/auth.guard';
@@ -24,6 +26,7 @@ import { UpdateTourDto } from './dto/update-tour.dto';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { JWTOptional } from '../auth/jwt-optional.decorator';
 import { IsActive } from '../auth/is-active.guard';
+import { FilesCountValidationPipe } from '../filesize.validation';
 
 @Controller('tours')
 export class ToursController {
@@ -38,11 +41,16 @@ export class ToursController {
   async createTour(
     @Body() createTourDto: CreateTourDto,
     @Request() req: any,
-    @UploadedFiles()
+    @UploadedFiles(
+      new FilesCountValidationPipe(),
+      new ParseFilePipeBuilder()
+        .addMaxSizeValidator({ maxSize: 1010101 })
+        .build({ fileIsRequired: true }),
+    )
     files: Array<Express.Multer.File>,
   ) {
-    // console.log('tour content____', createTourDto);
-    return this.tourService.createTour(files, createTourDto, req.user.id);
+    console.log('tour content____', files);
+    // return this.tourService.createTour(files, createTourDto, req.user.id);
   }
 
   @Put('/:id')

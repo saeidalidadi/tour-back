@@ -19,15 +19,6 @@ import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(__dirname, '..', '/public'),
-    //   serveStaticOptions: {
-    //     index: false,
-    //     cacheControl: false,
-    //     immutable: false,
-    //   },
-    //   serveRoot: '/public/',
-    // }),
     ConfigModule.forRoot({
       load: [configuration],
     }),
@@ -43,7 +34,7 @@ import { MailModule } from './mail/mail.module';
           password: database.password,
           database: database.name,
           entities: [...entities],
-          synchronize: process.env.NODE_ENV === 'development',
+          synchronize: false,
         };
       },
       inject: [ConfigService],

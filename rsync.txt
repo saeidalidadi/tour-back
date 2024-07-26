@@ -1,0 +1,13 @@
+node_modules
+.gitignore
+.prettierrc
+rsync.md
+tsconfig.build.json
+tsconfig.json
+src
+test
+.eslintrc
+public/tours/*
+public/avatars/*
+dist
+.env.yaml
